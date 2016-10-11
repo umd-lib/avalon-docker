@@ -192,7 +192,7 @@ https://wiki.duraspace.org/display/FEDORA36/Spring+Security
             GSearchDOManager is used, and the service requires 
             authentication.</comment>
     </param>
-    <param name="storagePool" value="localPostgreSQLPool">
+    <param name="storagePool" value="localMySQLPool">
       <comment>The named connection pool from which read/write database 
 	    	connections are to be provided for the storage subsystem (see the 
 	    	ConnectionPoolManager module). Default is the default provided by the 
@@ -549,7 +549,7 @@ https://wiki.duraspace.org/display/FEDORA36/Spring+Security
             validation tests will not be run.</comment>
     </param>
     <param name="ddlConverter" value="org.fcrepo.server.utilities.MySQLDDLConverter"/>
-    <param name="dbUsername" value="fedoraAdmin">
+    <param name="dbUsername" value="${FEDORA_DB_USER}">
       <comment>The database user name.</comment>
     </param>
     <param name="testOnReturn" value="true">
@@ -559,10 +559,10 @@ https://wiki.duraspace.org/display/FEDORA36/Spring+Security
     <param name="maxActive" value="100">
       <comment>The maximum number of active instances in pool.</comment>
     </param>
-    <param name="dbPassword" value="fedoraAdmin">
+    <param name="dbPassword" value="${FEDORA_DB_PASSWORD}">
       <comment>The database password.</comment>
     </param>
-    <param name="jdbcURL" value="jdbc:mysql://localhost/fedora3?useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true">
+    <param name="jdbcURL" value="jdbc:mysql://${FEDORA_DB_URL}/fedora3?useUnicode=true&amp;characterEncoding=UTF-8&amp;autoReconnect=true">
       <comment>The JDBC connection URL.</comment>
     </param>
     <param name="whenExhaustedAction" value="1">

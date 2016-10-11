@@ -1,5 +1,5 @@
 FROM    phusion/passenger-ruby22
-ARG     AVALON_BRANCH=master
+ARG     AVALON_BRANCH
 RUN     ["/usr/bin/apt-get","update"]
 RUN     ["/usr/bin/apt-get","install","-y","mediainfo","ffmpeg","x264","cmake","pkg-config","lsof"]
 RUN     ln -s /usr/bin/lsof /usr/sbin/
@@ -8,6 +8,7 @@ RUN     rm -f /etc/service/nginx/down
 RUN     ln -s /etc/nginx/sites-available/avalon /etc/nginx/sites-enabled/avalon
 WORKDIR /home/app
 USER    app
+RUN	echo "1"
 RUN     git clone --branch=${AVALON_BRANCH} --depth=1 https://github.com/avalonmediasystem/avalon.git
 ADD     Gemfile.local /home/app/avalon/
 ADD     config/* /home/app/avalon/config/
@@ -16,9 +17,10 @@ RUN     cd avalon && \
           bundle config build.nokogiri --use-system-libraries && \
           bundle install --path=vendor/gems --without development test && \
           cd ..
-ARG     BASE_URL=http://avalon:80/
+ARG     BASE_URL
 ARG     SECRET_KEY_BASE
 ARG     DATABASE_URL
+ARG     ASSET_HOST
 RUN     cd avalon && \
           bundle exec whenever -w && \
           bundle exec rake assets:precompile && \
@@ -32,3 +34,4 @@ ADD     ./avalon.conf /etc/nginx/sites-available/avalon
 ADD     ./nginx_env.conf /etc/nginx/main.d/env.conf
 ADD     db_migrate.sh /etc/my_init.d/30_db_migrate.sh
 ADD     avalon_delayed_job.sh /etc/service/delayed_job/run
+EXPOSE  80

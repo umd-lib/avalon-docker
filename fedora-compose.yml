@@ -1,0 +1,23 @@
+version: '2'
+
+services:
+  fedora:
+    image: 039358184980.dkr.ecr.us-west-2.amazonaws.com/fedora
+    build: 
+      context: ./fedora
+      args:
+        - FEDORA_DB_PASSWORD
+        - FEDORA_VERSION
+    volumes:
+      - /data:/data
+      - /dummy:/dummy
+    cpu_shares: 0
+    mem_limit: 2024288000
+    ports:
+      - "8080:8080"
+    environment:
+      - FEDORA_DB_PASSWORD
+      - FEDORA_DB_USER
+      - FEDORA_DB_URL
+    env_file: 
+      - .env

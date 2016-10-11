@@ -1,66 +1,23 @@
 version: '2'
 
-volumes:
-  streaming:
-  database:
-  fedora:
-  work:
-    
 services:
-  db:
-    build: ./db
-    volumes:
-      - database:/data
-    environment:
-      - AVALON_DB_PASSWORD
-      - FEDORA_DB_PASSWORD
-      - PGDATA=/data
-      - POSTGRES_USER
-  fedora:
-    build: 
-      context: ./fedora
-      args:
-        - FEDORA_DB_PASSWORD
-        - FEDORA_VERSION
-    depends_on:
-      - db
-    volumes:
-      - fedora:/data
-  solr:
-    build: 
-      context: ./solr
-      args:
-        - AVALON_BRANCH
-    ports:
-      - "8983:8080"
-  matterhorn:
-    build: 
-      context: ./matterhorn
-      args:
-        - MATTERHORN_VER
-        - MATTERHORN_BRANCH
-    volumes:
-      - ./masterfiles:/masterfiles
-      - streaming:/streamfiles
-      - work:/work
   avalon:
     build: 
       context: ./avalon
       args:
         - AVALON_BRANCH
-        - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
+        - DATABASE_URL
         - SECRET_KEY_BASE
-    depends_on:
-      - db
-      - fedora
-      - solr
-      - matterhorn
+        - BASE_URL
+        - ASSET_HOST
+    image: 039358184980.dkr.ecr.us-west-2.amazonaws.com/avalon:latest 
+    mem_limit: 1000000000
     environment:
       - APP_NAME
       - SECRET_KEY_BASE
       - BASE_URL
       - CONTROLLED_VOCABULARY
-      - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
+      - DATABASE_URL
       - DROPBOX_PATH
       - DROPBOX_URI
       - EMAIL_COMMENTS
@@ -94,20 +51,18 @@ services:
       - Z3950_DATABASE
       - Z3950_HOST
       - Z3950_PORT
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_REGION
+      - AWS_PIPELINE_ID
+      - S3_BUCKET
+      - S3_UPLOAD_PREFIX
+      - S3_OUTPUT_PREFIX
+      - CLOUDFRONT_KEYFILE 
+    env_file: 
+      - .env
     volumes:
-      - ./masterfiles:/masterfiles
-      - ./gems:/gems
+      - /masterfiles:/masterfiles
+      - /gems:/gems
     ports:
-      - "8888:80"
-  streaming:
-    build: 
-      context: ./streaming
-      args:
-        - WOWZA_ADMIN_PASSWORD
-        - WOWZA_ADMIN_USER
-        - WOWZA_LICENSE_KEY
-        - WOWZA_SILENT_INSTALL_KEY
-    volumes:
-      - streaming:/streamfiles
-    ports:
-      - "1935:1935"
+      - "80:80"

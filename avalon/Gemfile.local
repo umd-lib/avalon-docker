@@ -1,1 +1,4 @@
-gem 'pg'
+gem 'mysql2', '~>0.3.20'
+gem 'aws-sdk'
+gem 'aws_cf_signer'
+gem 'byebug'

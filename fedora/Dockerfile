@@ -8,4 +8,5 @@ ADD  fedora.xml ${JETTY_BASE}/webapps/fedora.xml
 RUN  /bin/chown -R jetty:jetty ${JETTY_BASE}/fedora/ ${JETTY_BASE}/etc/
 RUN  /bin/echo etc/jetty-fedorarealm.xml > ${JETTY_BASE}/start.ini
 ADD  fedora-entrypoint.sh /
+EXPOSE 8080
 ENTRYPOINT ["/fedora-entrypoint.sh"]
