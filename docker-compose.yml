@@ -2,24 +2,11 @@ version: '2'
 
 volumes:
   streaming:
-  database:
   fedora:
   work:
   solr:
     
 services:
-  db:
-    image: avalonmediasystem/avalon-5.x:db
-    build: ./db
-    volumes:
-      - database:/data
-    environment:
-      - AVALON_DB_PASSWORD
-      - FEDORA_DB_PASSWORD
-      - PGDATA=/data
-      - POSTGRES_USER=postgres
-    ports:
-      - "5432:5432"
   fedora:
     image: avalonmediasystem/avalon-6.x:fedora
     build: 
@@ -27,8 +14,6 @@ services:
       args:
         - FEDORA_DB_PASSWORD
         - FEDORA_VERSION=4.5.1
-    depends_on:
-      - db
     volumes:
       - fedora:/data
     ports:
@@ -56,7 +41,7 @@ services:
         - MATTERHORN_VER=1.4
         - MATTERHORN_BRANCH=1.4.x
     volumes:
-      - ./masterfiles:/masterfiles
+      - $PWD/masterfiles:/masterfiles
       - streaming:/streamfiles
       - work:/work
     ports:
@@ -70,68 +55,9 @@ services:
     ports:
       - "1935:1935"
       - "8880:80"
+    extra_hosts:
+      - "avalon:172.16.123.1"
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
-  avalon:
-    image: avalonmediasystem/avalon-6.x:avalon
-    build: 
-      context: ./avalon
-      args:
-        - AVALON_BRANCH
-        - SECRET_KEY_BASE
-        - BASE_URL
-    depends_on:
-      - db
-      - fedora
-      - solr
-      - redis
-    environment:
-      - APP_NAME
-      - SECRET_KEY_BASE
-      - ASSET_HOST
-      - BASE_URL
-      - CONTROLLED_VOCABULARY=config/controlled_vocabulary.yml
-      - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
-      - DROPBOX_PATH=/masterfiles/dropbox
-      - DROPBOX_URI=./masterfiles/dropbox
-      - EMAIL_COMMENTS
-      - EMAIL_NOTIFICATION
-      - EMAIL_SUPPORT
-      - FEDORA_BASE_PATH
-      - FEDORA_NAMESPACE=avalon
-      - FEDORA_URL=http://fedoraAdmin:fedoraAdmin@fedora:8080/fedora/rest
-      - FFMPEG_PATH=/usr/bin/ffmpeg
-      - MASTER_FILE_PATH
-      - MASTER_FILE_STRATEGY=delete
-      - MATTERHORN_URL=http://matterhorn_system_account:CHANGE_ME@matterhorn:8080/
-      - MEDIA_PATH=/masterfiles
-      - MEDIAINFO_PATH=/usr/bin/mediainfo
-      - RAILS_ENV=production
-      - REDIS_SERVER=redis:6379
-      - SMTP_ADDRESS
-      - SMTP_AUTHENTICATION
-      - SMTP_DOMAIN
-      - SMTP_ENABLE_STARTTLS_AUTO
-      - SMTP_OPENSSL_VERIFY_MODE
-      - SMTP_PASSWORD
-      - SMTP_PORT
-      - SMTP_USER_NAME
-      - SOLR_URL=http://solr:8983/solr/avalon
-      - STREAM_BASE=/streamfiles
-      - STREAM_DEFAULT_QUALITY=medium
-      - STREAM_HTTP_BASE=http://${STREAMING_HOST}:8880/avalon
-      - STREAM_RTMP_BASE=rtmp://${STREAMING_HOST}/avalon
-      - STREAM_SERVER=nginx
-      - STREAM_TOKEN_TTL=20
-      - SYSTEM_GROUPS=administrator,group_manager,manager
-      - Z3950_ATTRIBUTE
-      - Z3950_DATABASE
-      - Z3950_HOST
-      - Z3950_PORT
-    volumes:
-      - ./masterfiles:/masterfiles
-      - ./gems:/gems
-    ports:
-      - "8888:80"

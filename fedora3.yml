@@ -1,0 +1,26 @@
+version: '2'
+
+volumes:
+  database:
+  fedora3:
+    
+services:
+  db:
+    image: avalonmediasystem/avalon-5.x:db
+    volumes:
+      - database:/data
+    environment:
+      - AVALON_DB_PASSWORD
+      - FEDORA_DB_PASSWORD
+      - PGDATA=/data
+      - POSTGRES_USER=postgres
+    ports:
+      - "5432:5432"
+  fedora3:
+    image: avalonmediasystem/avalon-5.x:fedora
+    depends_on:
+      - db
+    volumes:
+      - fedora3:/data
+    ports:
+      - "8986:8080"
