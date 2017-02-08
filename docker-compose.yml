@@ -8,7 +8,7 @@ volumes:
     
 services:
   fedora:
-    image: avalonmediasystem/avalon-6.x:fedora
+    image: avalonmediasystem/fedora:4.x
     build: 
       context: ./fedora
       args:
@@ -19,7 +19,7 @@ services:
     ports:
       - "8984:8080"
   solr:
-    image: avalonmediasystem/avalon-6.x:solr
+    image: avalonmediasystem/solr
     build: 
       context: ./solr
       args:
@@ -34,7 +34,7 @@ services:
       - avalon
       - /opt/solr/avalon_conf
   matterhorn:
-    image: avalonmediasystem/avalon-5.x:matterhorn
+    image: avalonmediasystem/matterhorn
     build: 
       context: ./matterhorn
       args:
@@ -47,7 +47,7 @@ services:
     ports:
       - "8080:8080"
   streaming:
-    image: avalonmediasystem/avalon-5.x:nginx
+    image: avalonmediasystem/nginx
     build: 
       context: ./nginx
     volumes:

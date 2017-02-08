@@ -6,7 +6,7 @@ volumes:
     
 services:
   db:
-    image: avalonmediasystem/avalon-5.x:db
+    image: avalonmediasystem/db
     volumes:
       - database:/data
     environment:
@@ -17,7 +17,7 @@ services:
     ports:
       - "5432:5432"
   fedora3:
-    image: avalonmediasystem/avalon-5.x:fedora
+    image: avalonmediasystem/fedora:3.x
     depends_on:
       - db
     volumes:
