@@ -41,7 +41,7 @@ services:
         - MATTERHORN_VER=1.4
         - MATTERHORN_BRANCH=1.4.x
     volumes:
-      - $PWD/masterfiles:/masterfiles
+      - /masterfiles:/masterfiles
       - streaming:/streamfiles
       - work:/work
     ports:
