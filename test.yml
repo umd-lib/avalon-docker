@@ -1,0 +1,63 @@
+version: '2'
+
+volumes:
+  streaming-test:
+  fedora-test:
+  work-test:
+  solr-test:
+    
+services:
+  fedora:
+    image: avalonmediasystem/fedora:4.x
+    build: 
+      context: ./fedora
+      args:
+        - FEDORA_DB_PASSWORD
+        - FEDORA_VERSION=4.5.1
+    volumes:
+      - fedora-test:/data
+    ports:
+      - "8984:8080"
+  solr:
+    image: avalonmediasystem/solr
+    build: 
+      context: ./solr
+      args:
+        - AVALON_BRANCH
+    ports:
+      - "8983:8983"
+    volumes:
+      - solr-test:/opt/solr/server/solr/mycores
+    entrypoint:
+      - docker-entrypoint.sh
+      - solr-precreate
+      - avalon
+      - /opt/solr/avalon_conf
+  matterhorn:
+    image: avalonmediasystem/matterhorn
+    build: 
+      context: ./matterhorn
+      args:
+        - MATTERHORN_VER=1.4
+        - MATTERHORN_BRANCH=1.4.x
+    volumes:
+      - /masterfiles:/masterfiles
+      - streaming-test:/streamfiles
+      - work-test:/work
+    ports:
+      - "8080:8080"
+  streaming:
+    image: avalonmediasystem/nginx
+    build: 
+      context: ./nginx
+    volumes:
+      - streaming-test:/data
+    ports:
+      - "1935:1935"
+      - "8880:80"
+    extra_hosts:
+      - "avalon:172.16.123.1"
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
