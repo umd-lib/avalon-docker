@@ -1,5 +1,15 @@
 ## Docker for Mac Container Networking
 
+### Automatic Instructions
+
+The following command will retrieve and execute the [installation script](https://github.com/avalonmediasystem/avalon-docker/blob/development/resources/install.sh). It requires `sudo` (root) access, so read through the script first if you want to check what it does.
+
+```
+curl https://raw.githubusercontent.com/avalonmediasystem/avalon-docker/development/resources/install.sh | sudo sh
+```
+
+### Manual Instructions
+
 Create `/Library/LaunchDaemons/org.avalonmediasystem.lo0.172.16.123.1.plist`:
     
 ```xml
