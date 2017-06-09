@@ -28,4 +28,13 @@ The project contains the Dockerfiles for all the necessary components of [Avalon
 * `docker-compose logs <service_name>` to see the container(s) logs
 * `docker-compose build --no-cache <service_name>` to build the image(s) from scratch
 * `docker ps` to see all running containers
-* `docker exec -it avalondocker_avalon_1 /bin/bash` to log into Avalon docker container
+* `docker exec -it avalondocker_avalon_1 /bin/bash` to get into the Avalon docker container
+
+### Developing for Avalon using Docker
+1. Checkout [avalon](http://github.com/avalonmediasystem/avalon) next to the avalon-docker directory
+2. Copy config files to Avalon `cp avalon-docker/avalon/config/* avalon/config/`
+3. Add postgres gem: `echo "gem 'pg'" > avalon/Gemfile.local`
+4. In avalon-docker,`cp dotenv.example .env` and fill out this file
+5. Get the images from Dockerhub: `docker-compose -f docker-compose-dev.yml pull`
+6. Bring up the stack: `docker-compose -f docker-compose-dev.yml up`
+7. After the Avalon container is fully up, it will pick up changes in the avalon directory

@@ -1,0 +1,18 @@
+FROM        ruby:2.2
+MAINTAINER  Phuong Dinh <pdinh@indiana.edu>
+RUN         apt-get update && apt-get upgrade -y build-essential nodejs
+RUN         apt-get install -y mediainfo x264 cmake pkg-config lsof sendmail
+RUN         mkdir -p /tmp/ffmpeg && \
+            cd /tmp/ffmpeg && \
+            curl https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz | tar xJ && \
+            cp `find . -type f -executable` /usr/bin/
+RUN         apt-get clean
+RUN         ln -s /usr/bin/lsof /usr/sbin/
+RUN         mkdir -p /home/app/avalon
+WORKDIR     /home/app/avalon
+ARG         AVALON_BRANCH=develop
+ARG         RAILS_ENV=development
+ARG         BASE_URL
+ARG         DATABASE_URL
+ARG         SECRET_KEY_BASE
+ADD         rails_init-dev.sh /

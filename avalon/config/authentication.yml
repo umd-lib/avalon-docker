@@ -4,3 +4,9 @@ production:
   :params:
     :fields:
     - :email
+development:
+- :name: Avalon Test Auth
+  :provider: :identity
+  :params:
+    :fields:
+    - :email
