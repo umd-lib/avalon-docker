@@ -21,12 +21,12 @@ services:
     ports:
       - "5432:5432"
   fedora:
-    image: avalonmediasystem/fedora:4.7.x
+    image: avalonmediasystem/fedora:4.7.3
     build: 
       context: ./fedora
       args:
         - FEDORA_DB_PASSWORD
-        - FEDORA_VERSION=4.7.1
+        - FEDORA_VERSION=4.7.3
     depends_on:
       - db
     volumes:
@@ -144,4 +144,4 @@ services:
       - ./gems:/gems
       - ../avalon:/home/app/avalon
     ports:
-      - "3000:3000"
+      - "3000:80"
