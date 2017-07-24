@@ -6,11 +6,11 @@ volumes:
   fedora:
   work:
   solr:
-    
+
 services:
   db:
-    image: avalonmediasystem/db:fedora4
-    build: ./db
+    image: avalonmediasystem/db:mysql
+    build: ./mysql
     volumes:
       - database:/data
     environment:
@@ -18,15 +18,18 @@ services:
       - FEDORA_DB_PASSWORD
       - PGDATA=/data
       - POSTGRES_USER=postgres
+      - MYSQL_ROOT_PASSWORD=mysqldb
     ports:
-      - "5432:5432"
+      - "3306:3306"
   fedora:
-    image: avalonmediasystem/fedora:4.7.x
-    build: 
+    image: avalonmediasystem/fedora:4.7.3
+    build:
       context: ./fedora
       args:
         - FEDORA_DB_PASSWORD
-        - FEDORA_VERSION=4.7.1
+        - FEDORA_VERSION=4.7.3
+    environment:
+      - FEDORA_DB_PASSWORD
     depends_on:
       - db
     volumes:
@@ -35,7 +38,7 @@ services:
       - "8984:8080"
   solr:
     image: avalonmediasystem/solr:latest
-    build: 
+    build:
       context: ./solr
       args:
         - AVALON_BRANCH
@@ -50,7 +53,7 @@ services:
       - /opt/solr/avalon_conf
   matterhorn:
     image: avalonmediasystem/matterhorn
-    build: 
+    build:
       context: ./matterhorn
       args:
         - MATTERHORN_VER=1.4
@@ -63,7 +66,7 @@ services:
       - "8080:8080"
   rtmp:
     image: avalonmediasystem/red5
-    build: 
+    build:
       context: ./red5
     volumes:
       - streaming:/data
@@ -82,8 +85,8 @@ services:
     ports:
       - "6379:6379"
   avalon:
-    image: avalonmediasystem/avalon:6.0
-    build: 
+    image: avalonmediasystem/avalon:6.1
+    build:
       context: ./avalon
       args:
         - AVALON_BRANCH
