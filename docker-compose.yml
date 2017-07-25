@@ -1,26 +1,42 @@
 version: '2'
 
 volumes:
+  database:
   streaming:
   fedora:
   work:
   solr:
-    
+
 services:
+  db:
+    image: avalonmediasystem/db:fedora4
+    build: ./db
+    volumes:
+      - database:/data
+    environment:
+      - AVALON_DB_PASSWORD
+      - FEDORA_DB_PASSWORD
+      - PGDATA=/data
+      - POSTGRES_USER=postgres
+    ports:
+      - "5432:5432"
   fedora:
     image: avalonmediasystem/fedora:4.x
-    build: 
+    build:
       context: ./fedora
       args:
-        - FEDORA_DB_PASSWORD
-        - FEDORA_VERSION=4.5.1
+        - FEDORA_VERSION=4.7.3
+    environment:
+      - FEDORA_DB_PASSWORD
     volumes:
       - fedora:/data
     ports:
       - "8984:8080"
+    depends_on:
+      - db
   solr:
     image: avalonmediasystem/solr
-    build: 
+    build:
       context: ./solr
       args:
         - AVALON_BRANCH
@@ -35,7 +51,7 @@ services:
       - /opt/solr/avalon_conf
   matterhorn:
     image: avalonmediasystem/matterhorn
-    build: 
+    build:
       context: ./matterhorn
       args:
         - MATTERHORN_VER=1.4
@@ -48,7 +64,7 @@ services:
       - "8080:8080"
   streaming:
     image: avalonmediasystem/nginx
-    build: 
+    build:
       context: ./nginx
     volumes:
       - streaming:/data
