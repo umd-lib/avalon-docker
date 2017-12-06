@@ -5,6 +5,8 @@ STREAMING_HOST=localhost
 AVALON_DB_PASSWORD=
 FEDORA_DB_PASSWORD=
 SECRET_KEY_BASE=
+AVALON_BRANCH=
+AVALON_REPO=
 
 # Recommended Settings
 EMAIL_COMMENTS=avalon-comments@example.edu

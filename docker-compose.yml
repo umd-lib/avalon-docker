@@ -86,6 +86,7 @@ services:
     build: 
       context: ./avalon
       args:
+        - AVALON_REPO
         - AVALON_BRANCH
         - SECRET_KEY_BASE
         - BASE_URL
