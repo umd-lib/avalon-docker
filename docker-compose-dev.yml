@@ -113,7 +113,6 @@ services:
       - FEDORA_URL=http://fedoraAdmin:fedoraAdmin@fedora:8080/fedora/rest
       - FFMPEG_PATH=/usr/bin/ffmpeg
       - MASTER_FILE_PATH
-      - MASTER_FILE_STRATEGY=delete
       - MATTERHORN_URL=http://matterhorn_system_account:CHANGE_ME@matterhorn:8080/
       - MEDIA_PATH=/masterfiles
       - MEDIAINFO_PATH=/usr/bin/mediainfo
