@@ -1,4 +1,4 @@
-FROM        ruby:2.2
+FROM        ruby:2.3
 MAINTAINER  Phuong Dinh <pdinh@indiana.edu>
 RUN         apt-get update && apt-get upgrade -y build-essential nodejs \
          && apt-get install -y \
