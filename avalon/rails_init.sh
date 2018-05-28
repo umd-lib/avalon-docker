@@ -14,6 +14,12 @@ chown -R app /masterfiles
 cd /home/app/avalon
 
 su app
+
+# Source the environment varaibles set in config file
+if [ -f /run/secrets/ap-secrets ]; then
+    . /run/secrets/ap-secrets
+fi
+
 BACKGROUND=yes QUEUE=* bundle exec rake resque:work
 BACKGROUND=yes bundle exec rake environment resque:scheduler
 RAILS_ENV=production bundle exec rake db:migrate
