@@ -1,3 +1,5 @@
+See [AP-README.md](./AP-README.md)
+
 # avalon-docker
 The project contains the Dockerfiles for all the necessary components of [Avalon Media System](http://github.com/avalonmediasystem/avalon)
 

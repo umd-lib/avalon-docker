@@ -1,0 +1,39 @@
+# Compose version
+version: "3.6"
+
+services:
+  db:
+    image: docker.lib.umd.edu/avalonmediasystem/db:fedora4-ap-0
+    build: ./db
+  fedora:
+    image: docker.lib.umd.edu/avalonmediasystem/fedora:4.7.5-ap-0
+    build: 
+      context: ./fedora
+      args:
+        - FEDORA_VERSION=4.7.5
+  solr:
+    image: avalonmediasystem/solr:latest
+    build: 
+      context: ./solr
+      args:
+        - AVALON_BRANCH=master
+  matterhorn:
+    image: avalonmediasystem/matterhorn
+    build: 
+      context: ./matterhorn
+      args:
+        - MATTERHORN_VER=1.4
+        - MATTERHORN_BRANCH=1.4.x
+  hls:
+    image: avalonmediasystem/nginx
+    build:
+      context: ./nginx
+  redis:
+    image: redis:alpine
+  avalon:
+    image: docker.lib.umd.edu/avalonmediasystem/avalon:6.4.2-ap-0
+    build:
+      context: ./avalon
+      args:
+        - AVALON_REPO=https://github.com/umd-lib/avalon.git
+        - AVALON_BRANCH=ap-master
