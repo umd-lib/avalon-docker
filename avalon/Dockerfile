@@ -1,8 +1,15 @@
-FROM        phusion/passenger-ruby22
-MAINTAINER  Michael B. Klein <michael.klein@northwestern.edu>
-RUN         apt-get update && apt-get upgrade -y
-RUN         apt-get install -y mediainfo ffmpeg x264 cmake pkg-config lsof sendmail
-RUN         apt-get clean
+FROM        phusion/passenger-ruby24
+LABEL       maintainer="Michael B. Klein <michael.klein@northwestern.edu>, Phuong Dinh <pdinh@indiana.edu>"
+RUN         apt-get update && apt-get install -y \
+            mediainfo \
+            ffmpeg \
+            x264 \
+            cmake \
+            pkg-config \
+            lsof \
+            sendmail \
+         && rm -rf /var/lib/apt/lists/* \
+         && apt-get clean
 RUN         ln -s /usr/bin/lsof /usr/sbin/ && \
             rm /etc/nginx/sites-enabled/default && \
             rm -f /etc/service/nginx/down && \
@@ -14,15 +21,16 @@ WORKDIR     /home/app
 USER        app
 RUN         git clone --branch=${AVALON_BRANCH} --depth=1 ${AVALON_REPO}
 ADD         Gemfile.local /home/app/avalon/
-ADD         config/* /home/app/avalon/config/
+ADD         config /home/app/avalon/config/
 ARG         RAILS_ENV=production
 RUN         cd avalon && \
+              gem install bundler && \
               bundle config build.nokogiri --use-system-libraries && \
-              bundle install --path=vendor/gems --without development test && \
+              bundle install --path=vendor/gems --with postgres --without development test profiling mysql && \
               cd ..
 ARG         BASE_URL
 ARG         DATABASE_URL
-ARG         SECRET_KEY_BASE
+ARG         SECRET_KEY_BASE=3fe397575565365108556c3e5549f139e8078a8ec8fd2675a83de96289b30550a266ac04488d7086322efbe573738e7b3ae005b2e3d9afd718aa337fa5e329cf 
 RUN         cd avalon && \
               mkdir -p tmp/pids && \
               bundle exec whenever -w -f config/docker_schedule.rb && \
