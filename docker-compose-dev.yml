@@ -21,7 +21,7 @@ services:
     ports:
       - "5432:5432"
   fedora:
-    image: avalonmediasystem/fedora:4.7.3
+    image: avalonmediasystem/fedora:4.7.x
     build: 
       context: ./fedora
       args:
