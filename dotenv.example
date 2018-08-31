@@ -1,7 +1,7 @@
 # Required Settings
 APP_NAME=avalon
 AVALON_BRANCH=bcm-develop
-BASE_URL=http://localhost:8888/
+BASE_URL=http://localhost:3000/
 STREAMING_HOST=localhost
 FEDORA_DB_PASSWORD=
 SECRET_KEY_BASE=

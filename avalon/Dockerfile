@@ -25,6 +25,8 @@ ADD         config /home/app/avalon/config/
 ARG         RAILS_ENV=production
 RUN         cd avalon && \
               gem install bundler && \
+              gem uninstall -i /usr/local/rvm/gems/ruby-2.4.4@global rack --version '>=1.7' && \
+              gem install rack --version '=1.6.8' && \
               bundle config build.nokogiri --use-system-libraries && \
               bundle install --path=vendor/gems --with postgres --without development test profiling mysql && \
               cd ..

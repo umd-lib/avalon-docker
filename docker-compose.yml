@@ -74,7 +74,7 @@ services:
     ports:
       - "6379:6379"
   avalon:
-    image: avalonmediasystem/avalon:6.4.3
+    image: docker.lib.umd.edu/avalon:6.4.3-bcm-0-SNAPSHOT
     build: 
       context: ./avalon
       args:
@@ -82,6 +82,7 @@ services:
         - AVALON_BRANCH
         - SECRET_KEY_BASE
         - BASE_URL
+        - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
     depends_on:
       - db
       - fedora
