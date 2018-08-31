@@ -1,1 +1,2 @@
-gem 'pg'
+gem 'tzinfo-data'
+

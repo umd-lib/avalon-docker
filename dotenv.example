@@ -1,10 +1,16 @@
 # Required Settings
 APP_NAME=avalon
+AVALON_BRANCH=bcm-develop
+BASE_URL=http://localhost:3000/
 STREAMING_HOST=localhost
 FEDORA_DB_PASSWORD=
 SECRET_KEY_BASE=
 AVALON_BRANCH=
 AVALON_REPO=
+
+# For testing production builds
+BASE_URL=http://localhost/
+SETTINGS__DOMAIN__HOST=localhost
 
 # Recommended Settings
 EMAIL_COMMENTS=avalon-comments@example.edu
