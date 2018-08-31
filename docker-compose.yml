@@ -74,7 +74,7 @@ services:
     ports:
       - "6379:6379"
   avalon:
-    image: docker.lib.umd.edu/avalon:6.4.3-bcm-0-SNAPSHOT
+    image: docker.lib.umd.edu/avalon:6.4.3-bcm-0-SNAPSHOT${TAG_SUFFIX}
     build: 
       context: ./avalon
       args:
@@ -83,6 +83,8 @@ services:
         - SECRET_KEY_BASE
         - BASE_URL
         - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
+        - BUNDLE_WITH=${BUNDLE_WITH}
+        - BUNDLE_WITHOUT=development:test:profiling:mysql
     depends_on:
       - db
       - fedora
@@ -104,6 +106,8 @@ services:
       - FEDORA_URL=http://fedoraAdmin:fedoraAdmin@fedora:8080/fedora/rest
       - SETTINGS__FFMPEG_PATH=/usr/bin/ffmpeg
       - MASTER_FILE_PATH
+      - SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER
+      - RAILS_GROUPS
       - MASTER_FILE_STRATEGY=delete
       - MATTERHORN_URL=http://matterhorn_system_account:CHANGE_ME@matterhorn:8080/
       - SETTINGS__MATTERHORN__MEDIA_PATH=/masterfiles

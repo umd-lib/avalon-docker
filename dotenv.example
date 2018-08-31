@@ -19,6 +19,14 @@ EMAIL_SUPPORT=avalon-support@example.edu
 SMTP_ADDRESS=smtp.example.edu
 SMTP_PORT=587
 
+# Enable for building AWS Docker image
+# BUNDLE_WITH=aws
+# TAG_SUFFIX=-aws
+
+# To miniammly test run a container AWS Docker image locally
+#SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER=better_active_elastic_job
+#RAILS_GROUPS=aws
+
 # Optional Settings
 # Z3950_HOST=
 # Z3950_PORT=
