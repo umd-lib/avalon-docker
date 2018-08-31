@@ -92,7 +92,7 @@ services:
       - APP_NAME
       - SECRET_KEY_BASE
       - ASSET_HOST
-      - SETTINGS__DOMAIN
+      - SETTINGS__DOMAIN__HOST
       - DATABASE_URL=postgres://avalon:${AVALON_DB_PASSWORD}@db/avalon
       - SETTINGS__DROPBOX__PATH=/masterfiles/dropbox
       - SETTINGS__DROPBOX__UPLOAD_URI=./masterfiles/dropbox
