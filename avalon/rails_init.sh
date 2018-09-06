@@ -22,6 +22,13 @@ if [ "$RAILS_GROUPS" != "aws" ]; then
 else
     if [ -z $SETTINGS__WORKER ]; then
         echo "SETTINGS__WORKER env not set: Webapp!"
+        core_status=$(curl -IL "$SOLR_URL/select?rows=0&q=*:*"  2>/dev/null | head -n 1 | cut -d$' ' -f2)
+        if [ $core_status -eq 404 ]; then
+            echo "Creating Solr core!"
+            RAILS_ENV=production bundle exec rake zookeeper:upload zookeeper:create
+        else
+            echo "Solr core already exists!"
+        fi
         RAILS_ENV=production bundle exec rake db:migrate
     else
         echo "SETTINGS__WORKER env set: Worker!"
