@@ -3,16 +3,16 @@ version: "3.6"
 
 services:
   db:
-    image: docker.lib.umd.edu/avalonmediasystem/db:fedora4-ap-0
+    image: docker.lib.umd.edu/avalonmediasystem/db:6.4.2
     build: ./db
   fedora:
-    image: docker.lib.umd.edu/avalonmediasystem/fedora:4.7.5-ap-0
-    build: 
+    image: docker.lib.umd.edu/avalonmediasystem/fedora:6.4.2
+    build:
       context: ./fedora
       args:
         - FEDORA_VERSION=4.7.5
   solr:
-    image: avalonmediasystem/solr:latest
+    image: docker.lib.umd.edu/avalonmediasystem/solr:6.4.2
     build: 
       context: ./solr
       args:
@@ -25,7 +25,7 @@ services:
         - MATTERHORN_VER=1.4
         - MATTERHORN_BRANCH=1.4.x
   hls:
-    image: avalonmediasystem/nginx
+    image: avalonmediasystem/nginx:6.4.2
     build:
       context: ./nginx
   redis:
@@ -35,5 +35,5 @@ services:
     build:
       context: ./avalon
       args:
-        - AVALON_REPO=https://github.com/umd-lib/avalon.git
-        - AVALON_BRANCH=ap-master
+        - AVALON_REPO
+        - AVALON_BRANCH
