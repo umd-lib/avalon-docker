@@ -6,7 +6,7 @@ services:
     image: docker.lib.umd.edu/avalonmediasystem/db:6.4.2
     build: ./db
   fedora:
-    image: docker.lib.umd.edu/avalonmediasystem/fedora:6.4.2
+    image: docker.lib.umd.edu/avalonmediasystem/fedora:6.4.2-ap-0
     build:
       context: ./fedora
       args:
