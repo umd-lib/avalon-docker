@@ -4,10 +4,10 @@ Instructions to build and deploy Avalon Pilot docker images to the UMD Nexus Doc
 
 ## Build and push images to UMD Nexus Docker Registry
 ```
-docker-compose -f avalon-pilot-compose.yml build db avalon
-docker-compose -f avalon-pilot-compose.yml push db avalon
+docker-compose -f avalon-pilot-compose.yml build db fedora avalon
+docker-compose -f avalon-pilot-compose.yml push db fedora avalon
 ```
-Note: Currently, db and avalon are the only customized images. If other images are customized, those needs to be included in the above commands to be built and pushed to the UMD Nexus Docker Registry.
+Note: Currently, db, fedora, and avalon are the only customized images. If other images are customized, those needs to be included in the above commands to be built and pushed to the UMD Nexus Docker Registry.
 
 
 ## Pull and push images to UMD Nexus Docker Registry
@@ -23,17 +23,14 @@ docker push docker.lib.umd.edu/avalonmediasystem/<service>:<avalon-app-version>
 
 Example: Pulling the current avalonmediasystem images and tagging them as 6.4.2 compatible images.
 ```
-docker pull avalonmediasystem/fedora:4.7.5
 docker pull avalonmediasystem/solr:latest
 docker pull avalonmediasystem/matterhorn
 docker pull avalonmediasystem/nginx
 
-docker tag avalonmediasystem/fedora:4.7.5 docker.lib.umd.edu/avalonmediasystem/fedora:6.4.2
 docker tag avalonmediasystem/solr:latest docker.lib.umd.edu/avalonmediasystem/solr:6.4.2
 docker tag avalonmediasystem/matterhorn docker.lib.umd.edu/avalonmediasystem/matterhorn:6.4.2
 docker tag avalonmediasystem/nginx docker.lib.umd.edu/avalonmediasystem/nginx:6.4.2
 
-docker push docker.lib.umd.edu/avalonmediasystem/fedora:6.4.2
 docker push docker.lib.umd.edu/avalonmediasystem/solr:6.4.2
 docker push docker.lib.umd.edu/avalonmediasystem/matterhorn:6.4.2
 docker push docker.lib.umd.edu/avalonmediasystem/nginx:6.4.2
