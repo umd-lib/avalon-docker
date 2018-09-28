@@ -3,6 +3,13 @@
 ### Developing for Broadcast Avalon using Docker
 
 1. Checkout [avalon](https://github.com/umd-lib/avalon) next to the avalon-docker directory.
+    In avalon, change the config/setting.yml redis settings to:
+
+    ```
+    redis:
+      host: redis 
+      port: 6379
+    ```
 
 2. Copy config files from avalon-docker to avalon:
 
