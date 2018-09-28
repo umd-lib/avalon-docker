@@ -13,4 +13,5 @@ ENV         FEDORA_DB_HOST=db
 ENV         FEDORA_DB_PORT=5432
 ENV         FEDORA_DB_NAME=fcrepo
 ENV         FEDORA_DB_USER=fedora
+ENV         FEDORA_BINARY_MIN_SIZE=4194304
 ENTRYPOINT  "/fedora-entrypoint.sh"
