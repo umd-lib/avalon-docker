@@ -7,6 +7,13 @@ AVALON_DB_PASSWORD=
 FEDORA_DB_PASSWORD=
 SECRET_KEY_BASE=
 
+# Required only for connecting to external database
+# Should not be configured while using 'db' container
+FEDORA_DB_HOST=
+FEDORA_DB_PORT=
+FEDORA_DB_NAME=
+FEDORA_DB_USER=
+
 # Recommended Settings
 EMAIL_COMMENTS=avalon-comments@example.edu
 EMAIL_NOTIFICATION=avalon-notifications@example.edu
