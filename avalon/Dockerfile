@@ -26,7 +26,7 @@ ARG         RAILS_ENV=production
 ARG         BUNDLE_WITH=postgres
 ARG         BUNDLE_WITHOUT=development:test:profiling:mysql
 RUN         cd avalon && \
-              gem install bundler && \
+              gem install bundler -v 1.17.3 && \
               gem uninstall -i /usr/local/rvm/gems/ruby-2.4.4@global rack --version '>=1.7' && \
               gem install rack --version '=1.6.8' && \
               bundle config build.nokogiri --use-system-libraries && \
