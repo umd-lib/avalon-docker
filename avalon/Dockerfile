@@ -40,4 +40,3 @@ RUN         chown -R app:app /home/app/avalon
 ADD         ./avalon.conf /etc/nginx/sites-available/avalon
 ADD         ./nginx_env.conf /etc/nginx/main.d/env.conf
 ADD         rails_init.sh /etc/my_init.d/30_rails_init.sh
-ADD         set_env.sh /etc/my_init.d/10_set_env.sh
