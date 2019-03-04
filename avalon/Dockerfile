@@ -33,7 +33,6 @@ RUN         cd avalon && \
               export SECRET_KEY_BASE=`rake secret` && \
               bundle exec whenever -w -f config/docker_schedule.rb && \
               bundle exec rake assets:precompile && \
-              cp config/controlled_vocabulary.yml.example config/controlled_vocabulary.yml && \
               cd ..
 USER        root
 RUN         chown -R app:app /home/app/avalon
