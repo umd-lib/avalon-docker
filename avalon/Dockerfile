@@ -8,8 +8,12 @@ RUN         apt-get update && apt-get install -y \
             pkg-config \
             lsof \
             sendmail \
+            jq \
+            python3-pip \
          && rm -rf /var/lib/apt/lists/* \
          && apt-get clean
+RUN         pip3 install awscli --upgrade && \
+            pip3 install csvkit --upgrade
 RUN         ln -s /usr/bin/lsof /usr/sbin/ && \
             rm /etc/nginx/sites-enabled/default && \
             rm -f /etc/service/nginx/down && \
@@ -21,13 +25,14 @@ WORKDIR     /home/app
 USER        app
 RUN         git clone --branch=${AVALON_BRANCH} --depth=1 ${AVALON_REPO}
 ADD         Gemfile.local /home/app/avalon/
-ADD         config /home/app/avalon/config/
 ARG         RAILS_ENV=production
 RUN         cd avalon && \
               gem install bundler -v 1.17.3 && \
               bundle config build.nokogiri --use-system-libraries && \
               bundle install --path=vendor/gems --with postgres --without development test profiling mysql && \
               cd ..
+ADD         config /home/app/avalon/config/
+ADD         s3-dropbox-sync.sh /home/app/avalon/script/s3-dropbox-sync.sh
 RUN         cd avalon && \
               mkdir -p tmp/pids && \
               export SECRET_KEY_BASE=`rake secret` && \
