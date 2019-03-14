@@ -6,3 +6,11 @@ every 1.minute do
   locking_sh "script/s3-dropbox-sync.sh", :lock_name => "s3_dropbox_sync"
   locking_rake "avalon:batch:ingest", :lock_name => "batch_ingest", :environment => ENV['RAILS_ENV'] || 'production'
 end
+
+every 15.minutes do
+  locking_rake "avalon:batch:ingest_status_check", :lock_name => "batch_ingest", :environment => ENV['RAILS_ENV'] || 'production'
+end
+
+every 1.day do
+  locking_rake "avalon:batch:ingest_stalled_check", :lock_name => "batch_ingest", :environment => ENV['RAILS_ENV'] || 'production'
+end
