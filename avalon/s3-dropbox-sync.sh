@@ -18,7 +18,7 @@ function get_s3_object_tag { get_s3_object_tags $1 | jq '.TagSet[] | select(.Key
 
 function get_s3_object_tag_value { get_s3_object_tag $1 $2 | jq -r .Value; }
 
-function is_processed { if [ $(get_s3_object_tag_value $1 $CLIENT_NAME) = "processed" ]; then return 0; else return 1; fi; }
+function is_processed { if [ "$(get_s3_object_tag_value $1 $CLIENT_NAME)" = "processed" ]; then return 0; else return 1; fi; }
 
 mp3_files_synced=0
 csv_files_synced=0
