@@ -76,7 +76,7 @@ services:
     ports:
       - "6379:6379"
   avalon:
-    image: docker.lib.umd.edu/avalon:6.4.3-bcm-0${TAG_SUFFIX}-SNAPSHOT
+    image: docker.lib.umd.edu/avalon:6.4.3${TAG_SUFFIX}${SNAPSHOT_SUFFIX}${AVALON_COMMIT}
     build: 
       context: ./avalon
       args:

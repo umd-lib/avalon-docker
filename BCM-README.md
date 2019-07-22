@@ -89,7 +89,11 @@ before building the image.
 
     ```
     BUNDLE_WITH=aws
-    TAG_SUFFIX=-aws
+    TAG_SUFFIX=-bcm-0
+    
+    # For SNAPSHOT builds to be pushed to Nexus
+    SNAPSHOT_SUFFIX=-SNAPSHOT_
+    AVALON_COMMIT=e7a5536
     ```
 
     For test running a AWS Image based container locally,

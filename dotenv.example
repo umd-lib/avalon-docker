@@ -20,8 +20,13 @@ SMTP_ADDRESS=smtp.example.edu
 SMTP_PORT=587
 
 # Enable for building AWS Docker image
-# BUNDLE_WITH=aws
-# TAG_SUFFIX=-aws
+BUNDLE_WITH=aws
+TAG_SUFFIX=-bcm-0
+
+# For publishing to Nexus
+SNAPSHOT_SUFFIX=-SNAPSHOT_
+# Use the specific commit hash (first 7 charcters) of Avalon codebase
+AVALON_COMMIT=e7a5536
 
 # To miniammly test run a container AWS Docker image locally
 #SETTINGS__ACTIVE_JOB__QUEUE_ADAPTER=better_active_elastic_job
