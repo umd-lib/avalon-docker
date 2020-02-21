@@ -11,8 +11,11 @@ touch /var/spool/cron/crontabs/app
 
 chmod 0777 -R /masterfiles
 chown -R app /masterfiles
-cd /home/app/avalon
 
+chmod 0777 -R /streamfiles
+chown -R app /streamfiles
+
+cd /home/app/avalon
 su app
 
 # Source the environment varaibles set in config file
@@ -24,8 +27,3 @@ BACKGROUND=yes QUEUE=* bundle exec rake resque:work
 BACKGROUND=yes bundle exec rake environment resque:scheduler
 RAILS_ENV=production bundle exec rake db:migrate
 exit
-
-cd public/assets/mediaelement_rails
-if [ ! -e flashmediaelement.swf ]; then
-  ln -s flashmediaelement-*.swf flashmediaelement.swf
-fi
