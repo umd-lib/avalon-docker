@@ -58,7 +58,8 @@ services:
     build:
       context: ./avalon
       args:
-        - AVALON_BRANCH
+        - AVALON_REPO=https://github.com/avalonmediasystem/avalon.git
+        - AVALON_BRANCH=master
         - SECRET_KEY_BASE
         - BASE_URL
     depends_on:

@@ -12,6 +12,9 @@ touch /var/spool/cron/crontabs/app
 chmod 0777 -R /masterfiles
 chown -R app /masterfiles
 
+chmod 0777 -R /streamfiles
+chown -R app /streamfiles
+
 cd /home/app/avalon
 su app
 
