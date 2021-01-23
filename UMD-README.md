@@ -11,8 +11,7 @@ The Avalon kubernetes stack uses images built from this repository. Some of the 
 
 To build the HLS Nginx image
 
-1. Update the image version of the HLS service on the docker-compose.yaml
-2. Build the image
+1. Build the image
 
     ```
     cd nginx
@@ -25,6 +24,24 @@ To build the HLS Nginx image
     ```
     # Using 'avalon-7.1-umd-0.alpha4' as the example version
     docker push docker.lib.umd.edu/nginx:avalon-7.1-umd-0.alpha4
+    ```
+#### SFTP
+
+To build the SFTP image
+
+1. Build the image
+
+    ```
+    cd sftp
+    # Using 'avalon-7.1-umd-0.alpha4' as the example version
+    docker build -t docker.lib.umd.edu/sftp:avalon-7.1-umd-0.alpha4 .
+    ```
+
+2. Deploy to Nexus
+
+    ```
+    # Using 'avalon-7.1-umd-0.alpha4' as the example version
+    docker push docker.lib.umd.edu/sftp:avalon-7.1-umd-0.alpha4
     ```
 
 ### Tagging stock images
