@@ -27,21 +27,21 @@ To build the HLS Nginx image
     ```
 #### SFTP
 
-To build the SFTP image
+To build the SFTP (with rsync) image
 
 1. Build the image
 
     ```
     cd sftp
     # Using 'avalon-7.1-umd-0.alpha4' as the example version
-    docker build -t docker.lib.umd.edu/sftp:avalon-7.1-umd-0.alpha4 .
+    docker build -t docker.lib.umd.edu/avalon-sftp:7.1-umd-0.alpha4 .
     ```
 
 2. Deploy to Nexus
 
     ```
     # Using 'avalon-7.1-umd-0.alpha4' as the example version
-    docker push docker.lib.umd.edu/sftp:avalon-7.1-umd-0.alpha4
+    docker push docker.lib.umd.edu/avalon-sftp:7.1-umd-0.alpha4
     ```
 
 ### Tagging stock images
