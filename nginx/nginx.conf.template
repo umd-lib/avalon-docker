@@ -15,6 +15,9 @@ http {
     vod_last_modified_types *;
     vod_metadata_cache metadata_cache 512m;
     vod_response_cache response_cache 128m;
+    vod_hls_absolute_index_urls off;
+    vod_hls_absolute_master_urls off;
+
     gzip on;
     gzip_types application/vnd.apple.mpegurl;
     vod_segments_base_url $AVALON_STREAMING_BASE_URL;
