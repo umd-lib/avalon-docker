@@ -1,76 +1,130 @@
 # UMD Avalon
 
-## Avalon Development Environment
-To be updated!
+## About the Docker images
 
-## Kubernetes Deployment
-The Avalon kubernetes stack uses images built from this repository. Some of the images that were customized needs to be built locally and deployed to UMD Nexus. In cases where we are using the stock avalon images, we still need to tag them with a specific avalon version and deploy them to UMD Nexus. This is to avoid using images without tags or with the non-stable tags (eg. latest) on the server environment.
+Both the UMD Avalon local development environment and Kubernetes stack use
+images built from this repository.
 
-### Local Builds
-#### HLS Nginx
+The UMD Avalon stack consists of
+
+* Customized Avalon Docker images
+* Stock Avalon Docker images that have been tagged with a specific version.
+  This is needed because some Avalon Docker images use images without tags, or
+  with non-stable tags (such as "latest), and SSDR policy is to only use
+  Docker images with specific tags in the server environment.
+* Docker images not provided by Avalon
+
+All Docker images should be built using "docker buildx" and the Kubernetes
+"build" namespace. See
+<https://github.com/umd-lib/devops/blob/main/k8s/docs/guides/DockerBuilds.md>
+in Confluence for more information.
+
+The Docker images are built with the "linux/amd64" architecture, so that they
+are compatible with the nodes running in Kubernetes. As of July 2025, it is
+not possible to build most of these images using the "linux/arm64" architecture,
+as the required base images do not support ARM. The "linux/amd64" Docker images
+will work on Apple Silicon MacBooks, however there may be a significant
+performance impact using a stock Docker Desktop implementation (it is strongly
+suggested that Orb Stack <https://orbstack.dev/> be used instead).
+
+## Tagging Docker Images
+
+The tags used for the Docker images are built around two variable components,
+the base Avalon version, and an UMD incrementing version for that base version.
+
+To simplify the instructions below, the following two environment variables
+are used in specifying the Docker tags:
+
+* AVALON_VERSION - the Avalon version, i.e., `7.6`
+* UMD_VERSION - combination of the Avalon version, and UMD incrementing
+                version, i.e., `7.6-umd-0`
+
+For example, to create the environment variables for generating the Docker tags
+for the first UMD version based on Avalon 7.6:
+
+```zsh
+export AVALON_VERSION=7.6
+export UMD_VERSION=$AVALON_VERSION-umd-0
+```
+
+## Building the UMD-customized Docker images
+
+### HLS Nginx
 
 To build the HLS Nginx image
 
-1. Build the image
+```zsh
+cd nginx
+docker buildx build --no-cache . --builder kube --platform linux/amd64 --push -t docker.lib.umd.edu/nginx:avalon-$UMD_VERSION
+```
 
-    ```
-    cd nginx
-    # Using 'avalon-7.1-umd-0.alpha4' as the example version
-    docker build -t docker.lib.umd.edu/nginx:avalon-7.1-umd-0.alpha4 .
-    ```
+The Docker image will be automatically pushed to the Nexus.
 
-3. Deploy to Nexus
-
-    ```
-    # Using 'avalon-7.1-umd-0.alpha4' as the example version
-    docker push docker.lib.umd.edu/nginx:avalon-7.1-umd-0.alpha4
-    ```
-#### SFTP
+### SFTP
 
 To build the SFTP (with rsync) image
 
-1. Build the image
+```zsh
+cd sftp
+docker buildx build --no-cache . --builder kube --platform linux/amd64 --push -t docker.lib.umd.edu/avalon-sftp:$UMD_VERSION
+```
 
-    ```
-    cd sftp
-    # Using 'avalon-7.1-umd-0.alpha4' as the example version
-    docker build -t docker.lib.umd.edu/avalon-sftp:7.1-umd-0.alpha4 .
-    ```
+The Docker image will be automatically pushed to the Nexus.
 
-2. Deploy to Nexus
-
-    ```
-    # Using 'avalon-7.1-umd-0.alpha4' as the example version
-    docker push docker.lib.umd.edu/avalon-sftp:7.1-umd-0.alpha4
-    ```
-
-### Tagging stock images
+## Tagging the Avalon stock images
 
 To tag and deploy stock images to Nexus
 
-1. Pull the images
+1. Pull the images:
 
-    ```
+    ```zsh
     docker-compose pull db fedora solr redis
     ```
 
-2. Tag them with version the avalon version
+2. Tag the images with a UMD-specific version number:
 
-    ```
-    # Using 'avalon-7.1' as the example version
-    docker tag avalonmediasystem/db:fedora4 docker.lib.umd.edu/db:fedora4-avalon-7.1
-    docker tag avalonmediasystem/fedora:4.7.5 docker.lib.umd.edu/fedora:4.7.5-avalon-7.1
-    docker tag avalonmediasystem/solr:latest docker.lib.umd.edu/solr:avalon-7.1
-    docker tag redis:alpine docker.lib.umd.edu/redis:avalon-7.1
-    ```
-
-3. Push them to nexus
-
-    ```
-    docker push docker.lib.umd.edu/db:fedora4-avalon-7.1
-    docker push docker.lib.umd.edu/fedora:4.7.5-avalon-7.1
-    docker push docker.lib.umd.edu/solr:avalon-7.1
-    docker push docker.lib.umd.edu/redis:avalon-7.1
+    ```zsh
+    docker tag postgres:14-alpine docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
+    docker tag avalonmediasystem/fedora:4.7.5 docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
+    docker tag avalonmediasystem/solr:latest docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
+    docker tag redis:alpine docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
     ```
 
-**Note**: the main avalon image is built using the Dockerfile in the https://github.com/umd-lib/avalon project.
+3. Push the images to the UMD Nexus:
+
+    ```zsh
+    docker push docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
+    docker push docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
+    docker push docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
+    docker push docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
+    ```
+
+**Note**: the main Avalon image is built using the Dockerfile in the
+<https://github.com/umd-lib/avalon> project.
+
+## UMD Customizations
+
+### UMD-README.md
+
+UMD-specific README.md describing use, procedures, and customizations.
+
+### SFTP Docker configuration
+
+The SFTP Docker configuration (in the "sftp" subdirectory) is a UMD addition to
+this repository, used to support SFTP uploads to Avalon.
+
+### Nginx
+
+### nginx/nginx.conf.template
+
+Modified to add "vod_segments_base_url" and "vod_base_url" to accommodate
+the separate URLs needed streaming in Kubernetes, via the
+`AVALON_STREAMING_BASE_URL` environment variable.
+
+Note that the `AVALON_STREAMING_BASE_URL` environment variable must also be
+defined in the Docker Compose stack for the local development environment,
+as it also uses this Docker image.
+
+### nginx/build-nginx.sh
+
+Added the "--with-http_ssl_module" for use with Kubernetes.

@@ -20,8 +20,10 @@ http {
 
     gzip on;
     gzip_types application/vnd.apple.mpegurl;
+    # UMD Customization
     vod_segments_base_url $AVALON_STREAMING_BASE_URL;
     vod_base_url $AVALON_STREAMING_BASE_URL;
+    # End UMD Customization
     open_file_cache          max=1000 inactive=5m;
     open_file_cache_valid    2m;
     open_file_cache_min_uses 1;

@@ -8,15 +8,17 @@ volumes:
 
 services:
   db:
-    image: avalonmediasystem/db:fedora4
+    image: postgres:14-alpine
     build: ./db
     volumes:
-      - database:/data
+      - ./db/init-db:/docker-entrypoint-initdb.d
+      - ./db_data:/data
     environment:
       - AVALON_DB_PASSWORD
       - FEDORA_DB_PASSWORD
       - PGDATA=/data
       - POSTGRES_USER=postgres
+      - POSTGRES_HOST_AUTH_METHOD=trust
   fedora:
     image: avalonmediasystem/fedora:4.7.5
     build:
@@ -44,7 +46,7 @@ services:
       - avalon
       - /opt/solr/avalon_conf
   hls:
-    image: docker.lib.umd.edu/nginx:avalon-7.5.1-umd-1
+    image: avalonmediasystem/nginx
     build:
       context: ./nginx
     environment:
@@ -56,11 +58,11 @@ services:
   redis:
     image: redis:alpine
   avalon: &avalon
-    image: docker.lib.umd.edu/avalon:7.5.1-umd-1
+    image: avalonmediasystem/avalon:7
     build:
-      context: https://github.com/umd-lib/avalon.git#7.5.1-umd-1
+      context: https://github.com/avalonmediasystem/avalon.git#v7.6.0
       target: prod
-    command: bash -c "bundle exec rake db:migrate && rails server -b 0.0.0.0"
+    command: bash -c "bundle exec rake db:migrate && bundle exec rails server -b 0.0.0.0"
     depends_on:
       - db
       - fedora
@@ -88,6 +90,7 @@ services:
       - MASTER_FILE_STRATEGY=delete
       - MATTERHORN_URL=http://matterhorn_system_account:CHANGE_ME@matterhorn:8080/
       - MEDIAINFO_PATH=/usr/bin/mediainfo
+      - RAILS_ADDITIONAL_HOSTS=avalon
       - RAILS_ENV=production
       - RAILS_LOG_TO_STDOUT=true
       - RAILS_SERVE_STATIC_FILES=true
@@ -113,6 +116,7 @@ services:
       - Z3950_PORT
     volumes:
       - ./masterfiles:/masterfiles
+      - ./storage:/home/app/avalon/storage #Config another location in storage.yml
       - streaming:/streamfiles
     ports:
       - "80:3000"
