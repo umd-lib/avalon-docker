@@ -6,8 +6,8 @@
 export AVALON_DOMAIN
 export AVALON_STREAMING_PORT
 # UMD Customization
-export AVALON_STREAMING_BASE_URL
-envsubst '$AVALON_DOMAIN,$AVALON_STREAMING_PORT,$AVALON_STREAMING_BASE_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+export AVALON_STREAMING_BUCKET_URL
+envsubst '$AVALON_DOMAIN,$AVALON_STREAMING_PORT,$AVALON_STREAMING_BUCKET_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 # End UMD Customization
 
 exec /usr/local/nginx/sbin/nginx
