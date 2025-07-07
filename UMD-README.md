@@ -73,21 +73,42 @@ The Docker image will be automatically pushed to the Nexus.
 
 ## Tagging the Avalon stock images
 
+**Note:** When tagging these images, the "amd64" architecture images must be
+used, as that is the architecture expected by Kubernetes.
+
 To tag and deploy stock images to Nexus
 
-1. Pull the images:
+1. Created environment variables for each of the stock Docker images being
+   renamed and redeployed to the Nexus.
+
+   The following commands use the "[yq](https://github.com/mikefarah/yq)"
+   utility to parse the Docker image names from the "docker-compose.yml" file:
 
     ```zsh
-    docker-compose pull db fedora solr redis
+    export DB_IMAGE=`yq '.services.db.image' docker-compose.yml`
+    export FEDORA_IMAGE=`yq '.services.fedora.image' docker-compose.yml`
+    export SOLR_IMAGE=`yq '.services.solr.image' docker-compose.yml`
+    export REDIS_IMAGE=`yq '.services.redis.image' docker-compose.yml`
     ```
+
+2. Pull the Docker images, specifying the "linux/amd64" architecture used by
+   Kubernetes. (Cannot use "docker-compose pull", because on an Apple Silicon
+   Mac, the "arm64" Docker images will be retrieved).
+
+   ```zsh
+   docker pull --platform=linux/amd64 $DB_IMAGE
+   docker pull --platform=linux/amd64 $FEDORA_IMAGE
+   docker pull --platform=linux/amd64 $SOLR_IMAGE
+   docker pull --platform=linux/amd64 $REDIS_IMAGE
+   ```
 
 2. Tag the images with a UMD-specific version number:
 
     ```zsh
-    docker tag postgres:14-alpine docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
-    docker tag avalonmediasystem/fedora:4.7.5 docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
-    docker tag avalonmediasystem/solr:latest docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
-    docker tag redis:alpine docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
+    docker tag $DB_IMAGE docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
+    docker tag $FEDORA_IMAGE docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
+    docker tag $SOLR_IMAGE docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
+    docker tag $REDIS_IMAGE docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
     ```
 
 3. Push the images to the UMD Nexus:
