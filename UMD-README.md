@@ -27,10 +27,18 @@ will work on Apple Silicon MacBooks, however there may be a significant
 performance impact using a stock Docker Desktop implementation (it is strongly
 suggested that Orb Stack <https://orbstack.dev/> be used instead).
 
-## Tagging Docker Images
+## UMD-customized Docker Images
 
-The tags used for the Docker images are built around two variable components,
-the base Avalon version, and an UMD incrementing version for that base version.
+The tags used for the UMD-customized Docker images are built around two variable
+components, the base Avalon version, and an UMD incrementing version for that
+base version.
+
+These Docker images are typically tagged just prior to promoting Avalon to
+Kubernetes for a release.
+
+See the "Stock Avalon Docker images" section for information on
+tagging Avalon-provided images that are not customized, and are typically
+tagged at the beginning of an Avalon upgrade.
 
 To simplify the instructions below, the following two environment variables
 are used in specifying the Docker tags:
@@ -47,9 +55,9 @@ export AVALON_VERSION=7.6
 export UMD_VERSION=$AVALON_VERSION-umd-0
 ```
 
-## Building the UMD-customized Docker images
+### Building the UMD-customized Docker images
 
-### HLS Nginx
+#### HLS Nginx
 
 To build the HLS Nginx image
 
@@ -60,7 +68,7 @@ docker buildx build --no-cache . --builder kube --platform linux/amd64 --push -t
 
 The Docker image will be automatically pushed to the Nexus.
 
-### SFTP
+#### SFTP
 
 To build the SFTP (with rsync) image
 
@@ -71,26 +79,64 @@ docker buildx build --no-cache . --builder kube --platform linux/amd64 --push -t
 
 The Docker image will be automatically pushed to the Nexus.
 
-## Tagging the Avalon stock images
+#### Avalon
+
+The main Avalon image is built using the Dockerfile in the
+<https://github.com/umd-lib/avalon> project.
+
+## Stock Avalon Docker images
+
+**Note:** When tagging these images, the "amd64" architecture images must be
+used, as that is the architecture expected by Kubernetes.
 
 To tag and deploy stock images to Nexus
 
-1. Pull the images:
+1. Checkout the *Avalon* tag for the release (i.e., "avalon-7.6.0"), to ensure
+   that a tagged commit of the repository is used. Using an Avalon-provided
+   tag, instead of a UMD custom tag because these images are typically created
+   at the start of an Avalon version upgrade, and no UMD tags for the version
+   exist.
+
+   ```zsh
+   git checkout <AVALON_TAG>
+   ```
+
+   where \<AVALON_TAG> is the Avalon version for the release.
+
+2. Create environment variables for each of the stock Docker images being
+   renamed and redeployed to the Nexus.
+
+   The following commands use the "[yq](https://github.com/mikefarah/yq)"
+   utility to parse the Docker image names from the "docker-compose.yml" file:
 
     ```zsh
-    docker-compose pull db fedora solr redis
+    export DB_IMAGE=`yq '.services.db.image' docker-compose.yml`
+    export FEDORA_IMAGE=`yq '.services.fedora.image' docker-compose.yml`
+    export SOLR_IMAGE=`yq '.services.solr.image' docker-compose.yml`
+    export REDIS_IMAGE=`yq '.services.redis.image' docker-compose.yml`
     ```
 
-2. Tag the images with a UMD-specific version number:
+3. Pull the Docker images, specifying the "linux/amd64" architecture used by
+   Kubernetes. (Cannot use "docker-compose pull", because on an Apple Silicon
+   Mac, the "arm64" Docker images will be retrieved).
+
+   ```zsh
+   docker pull --platform=linux/amd64 $DB_IMAGE
+   docker pull --platform=linux/amd64 $FEDORA_IMAGE
+   docker pull --platform=linux/amd64 $SOLR_IMAGE
+   docker pull --platform=linux/amd64 $REDIS_IMAGE
+   ```
+
+4. Tag the images with a UMD-specific version number:
 
     ```zsh
-    docker tag postgres:14-alpine docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
-    docker tag avalonmediasystem/fedora:4.7.5 docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
-    docker tag avalonmediasystem/solr:latest docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
-    docker tag redis:alpine docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
+    docker tag $DB_IMAGE docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
+    docker tag $FEDORA_IMAGE docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
+    docker tag $SOLR_IMAGE docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
+    docker tag $REDIS_IMAGE docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
     ```
 
-3. Push the images to the UMD Nexus:
+5. Push the images to the UMD Nexus:
 
     ```zsh
     docker push docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
@@ -98,9 +144,6 @@ To tag and deploy stock images to Nexus
     docker push docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
     docker push docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
     ```
-
-**Note**: the main Avalon image is built using the Dockerfile in the
-<https://github.com/umd-lib/avalon> project.
 
 ## UMD Customizations
 
