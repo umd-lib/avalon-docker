@@ -33,7 +33,11 @@ services:
     volumes:
       - fedora:/data
   solr:
-    image: solr:9
+    # UMD Customization
+    # Pinning to Solr 9.7, as in Avalon v8.0.1
+    # see https://github.com/avalonmediasystem/avalon/pull/6174
+    image: solr:9.7
+    # End UMD Customization
     volumes:
       - ./solr/conf:/opt/solr/avalon_conf
       - ./solr_data:/var/solr
