@@ -33,15 +33,15 @@ services:
     volumes:
       - fedora:/data
   solr:
-    image: avalonmediasystem/solr:latest
-    build:
-      context: ./solr
-      args:
-        - AVALON_BRANCH
+    # UMD Customization
+    # Pinning to Solr 9.7, as in Avalon v8.0.1
+    # see https://github.com/avalonmediasystem/avalon/pull/6174
+    image: solr:9.7
+    # End UMD Customization
     volumes:
-      - solr:/opt/solr/server/solr/mycores
-    entrypoint:
-      - docker-entrypoint.sh
+      - ./solr/conf:/opt/solr/avalon_conf
+      - ./solr_data:/var/solr
+    command:
       - solr-precreate
       - avalon
       - /opt/solr/avalon_conf
@@ -60,7 +60,7 @@ services:
   avalon: &avalon
     image: avalonmediasystem/avalon:7
     build:
-      context: https://github.com/avalonmediasystem/avalon.git#v7.6.0
+      context: https://github.com/avalonmediasystem/avalon.git#v7.7.2
       target: prod
     command: bash -c "bundle exec rake db:migrate && bundle exec rails server -b 0.0.0.0"
     depends_on:
