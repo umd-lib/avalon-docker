@@ -43,15 +43,21 @@ tagged at the beginning of an Avalon upgrade.
 To simplify the instructions below, the following two environment variables
 are used in specifying the Docker tags:
 
-* AVALON_VERSION - the Avalon version, i.e., `7.6`
+* AVALON_VERSION - the Avalon version, i.e., `7.8.0`
 * UMD_VERSION - combination of the Avalon version, and UMD incrementing
-                version, i.e., `7.6-umd-0`
+                version, i.e., `7.8.0-umd-0`
+
+**Note:** A three-part version number ("\<MAJOR>.\<MINOR>.\<PATCH>") is used,
+even if the corresponding Avalon tag has only two parts (i.e., a
+"7.8" version is assumed to be "7.8.0"). This provides greater
+consistency in the version numbers when the upstream Avalon does
+choose to use a minor version (such as "7.7.2" or "8.0.1").
 
 For example, to create the environment variables for generating the Docker tags
-for the first UMD version based on Avalon 7.6:
+for the first UMD version based on Avalon 7.8:
 
 ```zsh
-export AVALON_VERSION=7.6
+export AVALON_VERSION=7.8.0
 export UMD_VERSION=$AVALON_VERSION-umd-0
 ```
 
