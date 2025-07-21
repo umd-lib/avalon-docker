@@ -1,17 +1,23 @@
-# UMD Avalon
+# UMD avalon-docker
+
+This UMD-provided README.md describes using the Docker images provided by
+this repository with the UMD Avalon local development environment in
+the [umd-lib/avalon](https://github.com/umd-lib/avalon) repository and with
+the Kubernetes configurations in the
+[umd-lib/k8s-avalon](https://github.com/umd-lib/k8s-avalon) repository.
 
 ## About the Docker images
 
-Both the UMD Avalon local development environment and Kubernetes stack use
-images built from this repository.
+Both the UMD Avalon local development environment and Kubernetes configuration
+use images built from this repository.
 
 The UMD Avalon stack consists of
 
 * Customized Avalon Docker images
 * Stock Avalon Docker images that have been tagged with a specific version.
   This is needed because some Avalon Docker images use images without tags, or
-  with non-stable tags (such as "latest), and SSDR policy is to only use
-  Docker images with specific tags in the server environment.
+  with non-stable tags (such as "postgres:14-alpine), and SSDR policy is to only
+  use Docker images with specific tags in the server environment.
 * Docker images not provided by Avalon
 
 All Docker images should be built using "docker buildx" and the Kubernetes
@@ -27,89 +33,98 @@ will work on Apple Silicon MacBooks, however there may be a significant
 performance impact using a stock Docker Desktop implementation (it is strongly
 suggested that Orb Stack <https://orbstack.dev/> be used instead).
 
-## UMD-customized Docker Images
+## Git Tagging the Docker Image
 
-The tags used for the UMD-customized Docker images are built around two variable
-components, the base Avalon version, and an UMD incrementing version for that
-base version.
+The Docker images created from this repository are used in the
+"docker-compose.yml" file in the "umd-lib/avalon" repository for local
+development, and in the "kustomization.yaml" files in the "umd-lib/k8s-avalon"
+repository for server deployments.
 
-These Docker images are typically tagged just prior to promoting Avalon to
-Kubernetes for a release.
+Given these dependencies, a Git tag is typically created (with Docker images
+created using that tag) whenever this repository undergoes a significant
+changes (such as an Avalon version upgrade, or changes to the configuration of
+UMD-customized Docker images) in order to provide stable versions of the Docker
+images for use in local development and Kubernetes.
 
-See the "Stock Avalon Docker images" section for information on
-tagging Avalon-provided images that are not customized, and are typically
-tagged at the beginning of an Avalon upgrade.
+This means that the Git tag and Docker image creation does not usually occur in
+sync with a QA/prod release, and, in fact, generally occurs much earlier in the
+development lifecycle.
 
-To simplify the instructions below, the following two environment variables
-are used in specifying the Docker tags:
+For example, the likely first step in an Avalon version upgrade would be to
+incorporate the upstream "avalonmediasystem/avalon-docker" version changes into
+this repository, before moving on to the version changes from the
+"avalonmediasystem/avalon" repository (in the "umd-lib/avalon" codebase).
+A Git tag, and the Docker images, should be created as soon as the
+version update is complete in this repository, in order to provide stable Docker
+versions for the changes in the "umd-lib/avalon" repository.
 
-* AVALON_VERSION - the Avalon version, i.e., `7.8.0`
-* UMD_VERSION - combination of the Avalon version, and UMD incrementing
-                version, i.e., `7.8.0-umd-0`
+Similarly, if changes are needed to this repository as part of Avalon
+development, those changes should be tagged as soon as reasonable (without
+necessarily waiting for a QA/prod release) and the Docker images updated in the
+"umd-lib/avalon" and "umd-lib/k8s-avalon" repositories.
 
-**Note:** A three-part version number ("\<MAJOR>.\<MINOR>.\<PATCH>") is used,
-even if the corresponding Avalon tag has only two parts (i.e., a
-"7.8" version is assumed to be "7.8.0"). This provides greater
-consistency in the version numbers when the upstream Avalon does
-choose to use a minor version (such as "7.7.2" or "8.0.1").
+This will likely result in some divergence between the "umd-lib/avalon" tags and
+the tags in this repository. This is acceptable, since while the two
+repositories are related, they have different lifecycles, which are reflected in
+the Git tags.
 
-For example, to create the environment variables for generating the Docker tags
-for the first UMD version based on Avalon 7.8:
+## Git Tag Format
 
-```zsh
-export AVALON_VERSION=7.8.0
-export UMD_VERSION=$AVALON_VERSION-umd-0
+The tags used for the Docker images are built around two variable components --
+the base Avalon version, and a UMD incrementing version for that
+base version, having the form:
+
+```text
+<AVALON_VERSION>-umd-<INTEGER>
 ```
 
-### Building the UMD-customized Docker images
+where
 
-#### HLS Nginx
+* \<AVALON_VERSION> - the Avalon version, i.e., `7.8.0`
 
-To build the HLS Nginx image
+  A three-part version number ("\<MAJOR>.\<MINOR>.\<PATCH>") is used,
+  even if the corresponding Avalon tag has only two parts (i.e., a "7.8" version
+  is assumed to be "7.8.0"). This provides greater consistency in the version
+  numbers when the upstream Avalon does choose to use a minor version (such as
+  "7.7.2" or "8.0.1").
 
-```zsh
-cd nginx
-docker buildx build --no-cache . --builder kube --platform linux/amd64 --push -t docker.lib.umd.edu/nginx:avalon-$UMD_VERSION
-```
+* \<INTEGER> - an UMD incrementing version, i.e., `0`, `1`, etc.
 
-The Docker image will be automatically pushed to the Nexus.
+Therefore the first Git tag based on an Avalon 7.8 release would be
+`7.8.0-umd-0`, followed (if needed) by `7.8.0-umd-1`.
 
-#### SFTP
+Note that the Git tags in the "umd-lib/avalon" repository follow the same
+pattern, but that the Git tag (and subsequent Docker image tags) used by this
+repository, and the tag used by the "umd-lib/avalon" repository (and its
+Docker image) may differ. They will usually coincide in the Avalon version, but
+could differ in the UMD incrementing version, as that is tracking each
+repository's particular changes.
 
-To build the SFTP (with rsync) image
+## Building the Docker Images
 
-```zsh
-cd sftp
-docker buildx build --no-cache . --builder kube --platform linux/amd64 --push -t docker.lib.umd.edu/avalon-sftp:$UMD_VERSION
-```
+The following assumes that the repository has been tagged with \<GIT_TAG>,
+which is then used as the version tag for the Docker images.
 
-The Docker image will be automatically pushed to the Nexus.
-
-#### Avalon
-
-The main Avalon image is built using the Dockerfile in the
-<https://github.com/umd-lib/avalon> project.
-
-## Stock Avalon Docker images
-
-**Note:** When tagging these images, the "amd64" architecture images must be
-used, as that is the architecture expected by Kubernetes.
-
-To tag and deploy stock images to Nexus
-
-1. Checkout the *Avalon* tag for the release (i.e., "avalon-7.6.0"), to ensure
-   that a tagged commit of the repository is used. Using an Avalon-provided
-   tag, instead of a UMD custom tag because these images are typically created
-   at the start of an Avalon version upgrade, and no UMD tags for the version
-   exist.
+1. Create an environment variable with the Git tag:
 
    ```zsh
-   git checkout <AVALON_TAG>
+   export GIT_TAG=<GIT_TAG>
    ```
 
-   where \<AVALON_TAG> is the Avalon version for the release.
+   For example, when building the Docker images for the first Avalon 7.8
+   release, where the Git tag is "7.8.0-umd-0":
 
-2. Create environment variables for each of the stock Docker images being
+   ```zsh
+   export GIT_TAG=7.8.0-umd-0
+   ```
+
+2. Checkout the tag:
+
+   ```zsh
+   git checkout $GIT_TAG
+   ```
+
+3. Create environment variables for each of the stock Docker images being
    renamed and redeployed to the Nexus.
 
    The following commands use the "[yq](https://github.com/mikefarah/yq)"
@@ -122,7 +137,7 @@ To tag and deploy stock images to Nexus
     export REDIS_IMAGE=`yq '.services.redis.image' docker-compose.yml`
     ```
 
-3. Pull the Docker images, specifying the "linux/amd64" architecture used by
+4. Pull the Docker images, specifying the "linux/amd64" architecture used by
    Kubernetes. (Cannot use "docker-compose pull", because on an Apple Silicon
    Mac, the "arm64" Docker images will be retrieved).
 
@@ -133,23 +148,52 @@ To tag and deploy stock images to Nexus
    docker pull --platform=linux/amd64 $REDIS_IMAGE
    ```
 
-4. Tag the images with a UMD-specific version number:
+5. Tag the images with a UMD-specific version number:
 
     ```zsh
-    docker tag $DB_IMAGE docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
-    docker tag $FEDORA_IMAGE docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
-    docker tag $SOLR_IMAGE docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
-    docker tag $REDIS_IMAGE docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
+    docker tag $DB_IMAGE docker.lib.umd.edu/db:fedora4-avalon-$GIT_TAG
+    docker tag $FEDORA_IMAGE docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
+    docker tag $SOLR_IMAGE docker.lib.umd.edu/solr:avalon-$GIT_TAG
+    docker tag $REDIS_IMAGE docker.lib.umd.edu/redis:avalon-$GIT_TAG
     ```
 
-5. Push the images to the UMD Nexus:
+    ----
+
+    **Note:** Prior to Avalon 7.8, these stock Docker images were typically
+    tagged only with the Avalon version number (i.e., "7.5.1").
+
+    ----
+
+6. Push the images to the UMD Nexus:
 
     ```zsh
-    docker push docker.lib.umd.edu/db:fedora4-avalon-$AVALON_VERSION
-    docker push docker.lib.umd.edu/fedora:4.7.5-avalon-$AVALON_VERSION
-    docker push docker.lib.umd.edu/solr:avalon-$AVALON_VERSION
-    docker push docker.lib.umd.edu/redis:avalon-$AVALON_VERSION
+    docker push docker.lib.umd.edu/db:fedora4-avalon-$GIT_TAG
+    docker push docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
+    docker push docker.lib.umd.edu/solr:avalon-$GIT_TAG
+    docker push docker.lib.umd.edu/redis:avalon-$GIT_TAG
     ```
+
+7. Build the HLS Nginx image:
+
+    ```zsh
+    cd nginx
+    docker buildx build --no-cache . --builder kube --platform linux/amd64 \
+      --push -t docker.lib.umd.edu/nginx:avalon-$GIT_TAG
+    cd ..
+    ```
+
+    The Docker image will be automatically pushed to the Nexus.
+
+8. Build the SFTP (with rsync) image:
+
+    ```zsh
+    cd sftp
+    docker buildx build --no-cache . --builder kube --platform linux/amd64 \
+      --push -t docker.lib.umd.edu/avalon-sftp:GIT_TAG
+    cd ..
+    ```
+
+    The Docker image will be automatically pushed to the Nexus.
 
 ## UMD Customizations
 
