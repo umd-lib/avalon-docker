@@ -189,7 +189,7 @@ which is then used as the version tag for the Docker images.
     ```zsh
     cd sftp
     docker buildx build --no-cache . --builder kube --platform linux/amd64 \
-      --push -t docker.lib.umd.edu/avalon-sftp:GIT_TAG
+      --push -t docker.lib.umd.edu/avalon-sftp:$GIT_TAG
     cd ..
     ```
 
