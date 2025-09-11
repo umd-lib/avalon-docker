@@ -4,8 +4,8 @@ cd /usr/src && git clone https://github.com/kaltura/nginx-vod-module.git && cd n
 cd /usr/src/nginx
 ./configure --with-file-aio --with-cc-opt="-O3" --conf-path=/etc/nginx/nginx.conf \
     --add-module=/usr/src/nginx-vod-module \
-    --with-http_auth_request_module --with-http_sub_module --with-http_ssl_module \
-    --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log
+    --with-http_auth_request_module --with-http_sub_module --with-http_ssl_module --with-debug \
+    --error-log-path=/dev/stderr --http-log-path=/dev/stdout
 make && make install
 cd /
 rm -rf /usr/src/*
