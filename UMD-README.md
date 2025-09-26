@@ -208,9 +208,18 @@ this repository, used to support SFTP uploads to Avalon.
 
 ### Nginx
 
+The nginx configuration are based on the
+<https://github.com/avalonmediasystem/avalon-docker/tree/avalon-7.8.0-aws_min>
+branch.
+
 ### nginx/nginx.conf.template
 
-Modified to add "vod_segments_base_url" and "vod_base_url" to accommodate
+Added a second location block so that the streaming requests for S3-backed
+derivatives are handled differently from the filesystem-backed derivatives. The
+derivatives in S3 are handled using the PreSigned-URL provided by Avalon which
+is UMD-customization since upstream uses Cloundfront for AWS deployment.
+
+Also, modified to add "vod_segments_base_url" and "vod_base_url" to accommodate
 the separate URLs needed streaming in Kubernetes, via the
 `AVALON_STREAMING_BASE_URL` environment variable.
 

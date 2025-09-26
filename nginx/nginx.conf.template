@@ -5,15 +5,14 @@ daemon off;
 events {
   worker_connections 1024;
 }
- 
+
 http {
   server {
     listen $AVALON_STREAMING_PORT;
 
-    vod_mode local;
     vod_last_modified 'Sun, 19 Nov 2000 08:52:00 GMT';
     vod_last_modified_types *;
-    vod_metadata_cache metadata_cache 512m;
+    vod_metadata_cache metadata_cache 1024m;
     vod_response_cache response_cache 128m;
     vod_hls_absolute_index_urls off;
     vod_hls_absolute_master_urls off;
@@ -35,6 +34,11 @@ http {
     }
     
     location ~ ^/avalon/(?<stream>.+)/(?<resource>.+\.(?:m3u8|ts)) {
+
+      # UMD Customization
+      vod_mode local;
+      # End UMD Customization
+
       alias /data/$stream;
       vod hls;
 
@@ -53,12 +57,42 @@ http {
       expires 100d;
     }
 
+    location ~ ^/s3-avalon/(?<stream>.+)/(?<resource>.+\.(?:m3u8|ts)) {
+      vod hls;
+      vod_mode remote;
+
+
+      set $want_s3_presigned_url true;
+      set $token "$arg_token";
+      add_header X-Stream-Auth-Token "$token";
+
+      sub_filter_types application/vnd.apple.mpegurl;
+      sub_filter_once off;
+      sub_filter '.ts' ".ts?token=$token";
+
+      auth_request /auth;
+
+      auth_request_set $remote_url $upstream_http_x_s3_presigned_url;
+
+      # Use the signed URL from Avalon
+      vod_upstream_location /fetch_from_s3;
+    }
+
+    # Internal location to actually proxy to S3
+    location /fetch_from_s3 {
+      resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+      internal;
+      proxy_pass $remote_url;
+      proxy_ssl_server_name on;
+    }
+
     location = /auth {
       resolver 127.0.0.1;
       proxy_pass $AVALON_DOMAIN/authorize.txt?token=$token&name=$stream;
       proxy_pass_request_body off;
       proxy_set_header Content-Length "";
       proxy_set_header X-Original-URI $request_uri;
+      proxy_set_header X-Want-S3-Presigned-URL $want_s3_presigned_url;
     }
 
     location /crossdomain.xml {
