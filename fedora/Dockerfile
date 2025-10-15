@@ -1,4 +1,4 @@
-FROM        jetty:alpine
+FROM        jetty:9-jdk8-alpine-amazoncorretto
 LABEL       maintainer="Michael B. Klein <michael.klein@northwestern.edu>, Phuong Dinh <pdinh@indiana.edu>"
 ARG         FEDORA_VERSION=4.7.5
 ADD         --chown=jetty:jetty fcrepo-webapp-${FEDORA_VERSION}.war ${JETTY_BASE}/fedora/fedora.war

@@ -132,7 +132,6 @@ which is then used as the version tag for the Docker images.
 
     ```zsh
     export DB_IMAGE=`yq '.services.db.image' docker-compose.yml`
-    export FEDORA_IMAGE=`yq '.services.fedora.image' docker-compose.yml`
     export SOLR_IMAGE=`yq '.services.solr.image' docker-compose.yml`
     export REDIS_IMAGE=`yq '.services.redis.image' docker-compose.yml`
     ```
@@ -143,7 +142,6 @@ which is then used as the version tag for the Docker images.
 
    ```zsh
    docker pull --platform=linux/amd64 $DB_IMAGE
-   docker pull --platform=linux/amd64 $FEDORA_IMAGE
    docker pull --platform=linux/amd64 $SOLR_IMAGE
    docker pull --platform=linux/amd64 $REDIS_IMAGE
    ```
@@ -152,7 +150,6 @@ which is then used as the version tag for the Docker images.
 
     ```zsh
     docker tag $DB_IMAGE docker.lib.umd.edu/db:fedora4-avalon-$GIT_TAG
-    docker tag $FEDORA_IMAGE docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
     docker tag $SOLR_IMAGE docker.lib.umd.edu/solr:avalon-$GIT_TAG
     docker tag $REDIS_IMAGE docker.lib.umd.edu/redis:avalon-$GIT_TAG
     ```
@@ -168,7 +165,6 @@ which is then used as the version tag for the Docker images.
 
     ```zsh
     docker push docker.lib.umd.edu/db:fedora4-avalon-$GIT_TAG
-    docker push docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
     docker push docker.lib.umd.edu/solr:avalon-$GIT_TAG
     docker push docker.lib.umd.edu/redis:avalon-$GIT_TAG
     ```
@@ -190,6 +186,17 @@ which is then used as the version tag for the Docker images.
     cd sftp
     docker buildx build --no-cache . --builder kube --platform linux/amd64 \
       --push -t docker.lib.umd.edu/avalon-sftp:$GIT_TAG
+    cd ..
+    ```
+
+    The Docker image will be automatically pushed to the Nexus.
+
+9. Build the Fedora image:
+
+    ```zsh
+    cd fedora
+    docker buildx build --no-cache . --builder kube --platform linux/amd64  \
+      --push -t docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
     cd ..
     ```
 
@@ -221,3 +228,8 @@ as it also uses this Docker image.
 ### nginx/build-nginx.sh
 
 Added the "--with-http_ssl_module" for use with Kubernetes.
+
+### Fedora
+
+Updated the base image to `jetty:9-jdk8-alpine-amazoncorretto` to get the
+latest Java 8 patch version.
