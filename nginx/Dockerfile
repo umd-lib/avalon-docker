@@ -3,6 +3,7 @@ MAINTAINER  Michael B. Klein <michael.klein@northwestern.edu>
 RUN         apt-get update && apt-get upgrade -y \
          && apt-get install -y mediainfo ffmpeg x264 \
             build-essential git libpcre3-dev zlib1g-dev libssl-dev dnsmasq \
+            curl ca-certificates libpcre3 zlib1g libnss-resolve \
             # gettext-base provides 'envsubst', used by nginx.sh
             gettext-base \
          && apt-get clean
