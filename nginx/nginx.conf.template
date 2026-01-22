@@ -7,6 +7,16 @@ events {
 }
 
 http {
+  # UMD Customization
+  # Auth cache to reduce load on auth service
+  proxy_cache_path /var/cache/nginx/auth_cache
+      levels=1:2 
+      keys_zone=auth_cache:64m 
+      max_size=64m 
+      inactive=3m 
+      use_temp_path=off;
+  # End UMD Customization
+
   server {
     listen $AVALON_STREAMING_PORT;
 
@@ -88,7 +98,32 @@ http {
 
     location = /auth {
       resolver 127.0.0.1;
+
+      # UMD Customization
+      # Configure caching for auth requests
+      internal;
+      proxy_set_header Host $host;
+      proxy_set_header Cookie "";
+  
+      proxy_cache_bypass 0;
+      proxy_no_cache 0;
+
+      proxy_cache auth_cache;
+      proxy_cache_key "$token$stream"; 
+      proxy_cache_valid 200 202 $PROXY_CACHE_VALID_DURATION;
+
+      # Ignore ALL back end headers that prevent caching
+      proxy_ignore_headers Set-Cookie Cache-Control Expires Vary;
+      proxy_hide_header Set-Cookie;
+      proxy_hide_header Vary;
+
+      # Don't pass the large client cookie string to the auth backends
+      proxy_pass_request_headers off; 
+      
       proxy_pass $AVALON_DOMAIN/authorize.txt?token=$token&name=$stream;
+      proxy_buffering on;
+      # End UMD Customization
+
       proxy_pass_request_body off;
       proxy_set_header Content-Length "";
       proxy_set_header X-Original-URI $request_uri;

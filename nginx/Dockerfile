@@ -20,6 +20,9 @@ RUN         mkdir /data \
          && chown nginx /var/log/nginx
 ADD         stat.xsl  /etc/nginx/stat.xsl
 
+# Set default proxy cache valid duration
+ENV         PROXY_CACHE_VALID_DURATION=3m
+
 ADD         nginx.conf.template /etc/nginx/nginx.conf.template
 RUN         mkdir /etc/service/dnsmasq
 ADD         dnsmasq.sh /etc/service/dnsmasq/run
