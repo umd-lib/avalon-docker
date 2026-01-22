@@ -223,6 +223,11 @@ Also, modified to add "vod_segments_base_url" and "vod_base_url" to accommodate
 the separate URLs needed streaming in Kubernetes, via the
 `AVALON_STREAMING_BASE_URL` environment variable.
 
+Added auth caching to reduce load on the auth service. The cache duration is
+configurable via the `PROXY_CACHE_VALID_DURATION` environment variable
+(default: 3m). The S3 presigned URL cache duration is configurable via the
+`S3_PRESIGNED_URL_CACHE_DURATION` environment variable (default: 240 seconds).
+
 Note that the `AVALON_STREAMING_BASE_URL` environment variable must also be
 defined in the Docker Compose stack for the local development environment,
 as it also uses this Docker image.
