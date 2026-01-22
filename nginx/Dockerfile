@@ -22,6 +22,8 @@ ADD         stat.xsl  /etc/nginx/stat.xsl
 
 # Set default proxy cache valid duration
 ENV         PROXY_CACHE_VALID_DURATION=3m
+# Set default S3 presigned URL cache duration (in seconds)
+ENV         S3_PRESIGNED_URL_CACHE_DURATION=240
 
 ADD         nginx.conf.template /etc/nginx/nginx.conf.template
 RUN         mkdir /etc/service/dnsmasq
