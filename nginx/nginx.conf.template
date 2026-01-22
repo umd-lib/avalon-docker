@@ -24,6 +24,10 @@ http {
     vod_last_modified_types *;
     vod_metadata_cache metadata_cache 1024m;
     vod_response_cache response_cache 128m;
+    # UMD Customization
+    # Set S3 Presigned URL cache duration
+    vod_mapping_cache mapping_cache 64m $S3_PRESIGNED_URL_CACHE_DURATION;
+    # End UMD Customization
     vod_hls_absolute_index_urls off;
     vod_hls_absolute_master_urls off;
 
