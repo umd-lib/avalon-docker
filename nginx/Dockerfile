@@ -3,6 +3,7 @@ MAINTAINER  Michael B. Klein <michael.klein@northwestern.edu>
 RUN         apt-get update && apt-get upgrade -y \
          && apt-get install -y mediainfo ffmpeg x264 \
             build-essential git libpcre3-dev zlib1g-dev libssl-dev dnsmasq \
+            curl ca-certificates libpcre3 zlib1g libnss-resolve \
             # gettext-base provides 'envsubst', used by nginx.sh
             gettext-base \
          && apt-get clean
@@ -18,6 +19,9 @@ RUN         mkdir /data \
          && mkdir -p /var/log/nginx \
          && chown nginx /var/log/nginx
 ADD         stat.xsl  /etc/nginx/stat.xsl
+
+# Set default proxy cache valid duration
+ENV         PROXY_CACHE_VALID_DURATION=3m
 
 ADD         nginx.conf.template /etc/nginx/nginx.conf.template
 RUN         mkdir /etc/service/dnsmasq
