@@ -13,7 +13,7 @@ use images built from this repository.
 
 The UMD Avalon stack consists of
 
-* Customized Docker images built from this repository (HLS nginx, SFTP)
+* Customized Docker images built from this repository (HLS nginx)
 * Stock Docker images used directly without retagging (db, Fedora, Solr, Redis)
 * Docker images not provided by Avalon
 
@@ -132,27 +132,11 @@ which is then used as the version tag for the Docker images.
 
     The Docker image will be automatically pushed to the Nexus.
 
-4. Build the SFTP (with rsync) image:
-
-    ```zsh
-    cd sftp
-    docker buildx build --no-cache . --builder kube --platform linux/amd64 \
-      --push -t docker.lib.umd.edu/avalon-sftp:$GIT_TAG
-    cd ..
-    ```
-
-    The Docker image will be automatically pushed to the Nexus.
-
 ## UMD Customizations
 
 ### UMD-README.md
 
 UMD-specific README.md describing use, procedures, and customizations.
-
-### SFTP Docker configuration
-
-The SFTP Docker configuration (in the "sftp" subdirectory) is a UMD addition to
-this repository, used to support SFTP uploads to Avalon.
 
 ### Nginx
 
