@@ -31,8 +31,6 @@ http {
     vod_hls_absolute_index_urls off;
     vod_hls_absolute_master_urls off;
 
-    gzip on;
-    gzip_types application/vnd.apple.mpegurl;
     # UMD Customization
     vod_segments_base_url $AVALON_STREAMING_BASE_URL;
     vod_base_url $AVALON_STREAMING_BASE_URL;
@@ -43,7 +41,6 @@ http {
     open_file_cache_errors   on;
     
     location /status {
-      access_log off;
       vod_status;
     }
     
@@ -55,6 +52,9 @@ http {
 
       alias /data/$stream;
       vod hls;
+
+      gzip on;
+      gzip_types application/x-mpegURL;
 
       set $token "$arg_token";
       add_header X-Stream-Auth-Token "$token";
@@ -100,6 +100,29 @@ http {
       proxy_set_header Cookie "";
       proxy_ssl_server_name on;
       proxy_pass $remote_url;
+    }
+
+    location ~ ^/avalon/(.+/.+\.(?:mp3)) {
+      set $stream $1;
+      alias /data/$stream;
+
+      set $token "$arg_token";
+      add_header X-Stream-Auth-Token "$token";
+
+      gzip on;
+      gzip_types audio/mp3;
+
+      sub_filter_types audio/mp3;
+      sub_filter_once off;
+      sub_filter '.mp3' ".mp3?token=$token";
+
+      auth_request /auth;
+
+      add_header Access-Control-Allow-Headers '*';
+      add_header Access-Control-Expose-Headers 'Server,range,Content-Length,Content-Range';
+      add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+      add_header Access-Control-Allow-Origin "*";
+      expires 100d;
     }
 
     location = /auth {
