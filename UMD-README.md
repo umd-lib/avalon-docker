@@ -132,6 +132,18 @@ which is then used as the version tag for the Docker images.
 
     The Docker image will be automatically pushed to the Nexus.
 
+4. Build the Fedora (fcrepo) image:
+
+    ```zsh
+    cd fedora
+    docker buildx build --no-cache . --builder kube --platform linux/amd64 \
+      -f Dockerfile.fcrepo7-irsa-fix \
+      --push -t docker.lib.umd.edu/fcrepo:avalon-$GIT_TAG
+    cd ..
+    ```
+
+    The Docker image will be automatically pushed to the Nexus.
+
 ## UMD Customizations
 
 ### UMD-README.md
@@ -175,3 +187,25 @@ as it also uses this Docker image.
 Updated to use `apt-get source nginx` (Ubuntu Noble system package) instead of
 downloading a pinned tarball from nginx.org. Added the `--with-http_ssl_module`
 and `--with-threads` flags for Kubernetes compatibility and VOD module async I/O.
+
+### fedora/Dockerfile.fcrepo7-irsa-fix
+
+Builds a custom `docker.lib.umd.edu/fcrepo` image on top of the stock
+`fcrepo/fcrepo:7-tomcat10` image. It adds the AWS STS JAR that is missing from
+the upstream Fedora distribution, which is required for
+[IRSA (IAM Roles for Service Accounts)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+/ web-identity token authentication against S3.
+
+The fix detects the AWS SDK version already bundled in the Fedora webapp and
+downloads the matching `sts` JAR from Maven Central — no manual version pinning
+is required.
+
+Upstream issues have been filed to add the AWS STS dependency directly to
+Fedora and its dependencies, which would make this custom image unnecessary:
+
+* <https://github.com/fcrepo/fcrepo/issues/2311> — fcrepo/fcrepo
+* <https://github.com/OCFL/ocfl-java/issues/140> — OCFL/ocfl-java
+
+Once either of those issues is resolved and the fix is included in a released
+version of the upstream `fcrepo/fcrepo` image, this custom image can be
+dropped in favor of the stock image.
