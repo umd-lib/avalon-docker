@@ -1,0 +1,56 @@
+# Fedora 4 Export Image
+#
+# Exports all content from a running Fedora 4 instance using the
+# fcrepo-import-export tool. Output is written to a mounted volume.
+#
+# Usage (Docker — standalone):
+#   docker run --rm \
+#     -e FEDORA_URL=http://fedora:8080/fedora/rest \
+#     -e FEDORA_USER=fedoraAdmin \
+#     -e FEDORA_PASSWORD=fedoraAdmin \
+#     -v /path/to/output:/data \
+#     docker.lib.umd.edu/fcrepo4-export:latest
+#
+# Usage (Docker — attached to existing docker-compose stack):
+#   docker run --rm \
+#     --network avalon_internal \
+#     -e FEDORA_URL=http://fedora:8080/fedora/rest \
+#     -e FEDORA_USER=fedoraAdmin \
+#     -e FEDORA_PASSWORD=fedoraAdmin \
+#     -v /path/to/output:/data \
+#     docker.lib.umd.edu/fcrepo4-export:latest
+#
+# Note: Fedora 4 REST path is /fedora/rest. Fedora 6 uses /fcrepo/rest.
+#
+# Note: The compose project network is named <project>_internal.
+#       Default project name is the directory name (avalon_internal).
+#       Override with: docker compose -p myproject ... or COMPOSE_PROJECT_NAME env var.
+#
+# Usage (K8s Job): see ../k8s/fcrepo4-export-job.yaml
+#
+# Volume:
+#   /data  — output directory; export lands in /data/fcrepo4_export/
+#            logs land in /data/export_<timestamp>.log
+#            any remaining_<timestamp>.log file triggers automatic resume
+
+FROM eclipse-temurin:21-jre-jammy
+
+LABEL maintainer="UMD Libraries <lib-systems@umd.edu>"
+LABEL description="Exports Fedora 4 content via fcrepo-import-export"
+
+ARG IMPORT_EXPORT_VERSION=1.2.0
+ARG IMPORT_EXPORT_JAR=fcrepo-import-export-${IMPORT_EXPORT_VERSION}.jar
+ARG IMPORT_EXPORT_URL=https://github.com/fcrepo-exts/fcrepo-import-export/releases/download/fcrepo-import-export-${IMPORT_EXPORT_VERSION}/${IMPORT_EXPORT_JAR}
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL -o /opt/fcrepo-import-export.jar "${IMPORT_EXPORT_URL}"
+
+COPY fcrepo4-export.sh /usr/local/bin/export.sh
+RUN chmod +x /usr/local/bin/export.sh
+
+VOLUME ["/data"]
+
+ENTRYPOINT ["/usr/local/bin/export.sh"]

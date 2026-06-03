@@ -1,0 +1,46 @@
+# Fedora Migration Image (F4 → F5 → F6)
+#
+# Converts a Fedora 4 export (produced by fcrepo4-export) into a Fedora 6
+# OCFL store via the two-step fcrepo-upgrade-utils process:
+#   F4 export  →  F5 intermediate  →  F6 OCFL
+#
+# Usage (Docker — standalone):
+#   docker run --rm \
+#     -e BASE_URI=http://fedora:8080/fcrepo/rest \
+#     -v /path/to/data:/data \
+#     docker.lib.umd.edu/fcrepo-migrate:latest
+#
+# Note: The migrate job does not connect to Fedora directly — BASE_URI is only
+#       embedded into the OCFL metadata as the resource identifier. No network
+#       attachment is required for the migration step.
+#
+# Volume layout expected under /data:
+#   /data/fcrepo4_export/   — input: produced by fcrepo4-export image
+#   /data/fcrepo5_export/   — intermediate (created by this image)
+#   /data/fcrepo6_export/   — output OCFL store (created by this image)
+#   /data/upgrade_5_*.log   — step 1 log
+#   /data/upgrade_6_*.log   — step 2 log
+#
+# Usage (K8s Job): see ../k8s/fcrepo-migrate-job.yaml
+
+FROM eclipse-temurin:21-jre-jammy
+
+LABEL maintainer="UMD Libraries <lib-systems@umd.edu>"
+LABEL description="Migrates Fedora 4 export to Fedora 6 OCFL format"
+
+ARG UPGRADE_UTILS_VERSION=6.3.0-AVALON
+ARG UPGRADE_UTILS_JAR=fcrepo-upgrade-utils-${UPGRADE_UTILS_VERSION}.jar
+ARG UPGRADE_UTILS_URL=https://github.com/avalonmediasystem/fcrepo-upgrade-utils/releases/download/${UPGRADE_UTILS_VERSION}/${UPGRADE_UTILS_JAR}
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN curl -fsSL -o /opt/fcrepo-upgrade-utils.jar "${UPGRADE_UTILS_URL}"
+
+COPY fcrepo-migrate-4-to-6.sh /usr/local/bin/migrate.sh
+RUN chmod +x /usr/local/bin/migrate.sh
+
+VOLUME ["/data"]
+
+ENTRYPOINT ["/usr/local/bin/migrate.sh"]
