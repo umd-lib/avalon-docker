@@ -77,7 +77,7 @@ base version, having the form:
 
 where
 
-* \<AVALON_VERSION> - the Avalon version, i.e., `8.1.1`
+* \<AVALON_VERSION> - the Avalon version, i.e., `8.2`
 
   A three-part version number ("\<MAJOR>.\<MINOR>.\<PATCH>") is used,
   even if the corresponding Avalon tag has only two parts (i.e., a "7.8" version
@@ -87,8 +87,8 @@ where
 
 * \<INTEGER> - an UMD incrementing version, i.e., `0`, `1`, etc.
 
-Therefore the first Git tag based on an Avalon 8.1.1 release would be
-`8.1.1-umd-0`, followed (if needed) by `8.1.1-umd-1`.
+Therefore the first Git tag based on an Avalon 8.2 release would be
+`8.2-umd-0`, followed (if needed) by `8.2-umd-1`.
 
 Note that the Git tags in the "umd-lib/avalon" repository follow the same
 pattern, but that the Git tag (and subsequent Docker image tags) used by this
@@ -108,11 +108,11 @@ which is then used as the version tag for the Docker images.
    export GIT_TAG=<GIT_TAG>
    ```
 
-   For example, when building the Docker images for the first Avalon 8.1.1
-   release, where the Git tag is "8.1.1-umd-0":
+   For example, when building the Docker images for the first Avalon 8.2
+   release, where the Git tag is "8.2-umd-0":
 
    ```zsh
-   export GIT_TAG=8.1.1-umd-0
+   export GIT_TAG=8.2-umd-0
    ```
 
 2. Checkout the tag:
@@ -153,7 +153,7 @@ UMD-specific README.md describing use, procedures, and customizations.
 ### Nginx
 
 The nginx configuration is based on the upstream
-<https://github.com/avalonmediasystem/avalon-docker> `avalon-8.1.1` tag, with
+<https://github.com/avalonmediasystem/avalon-docker> `avalon-8.2` tag, with
 UMD-specific additions (see below).
 
 ### nginx/Dockerfile
