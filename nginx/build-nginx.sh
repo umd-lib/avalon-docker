@@ -13,6 +13,7 @@ cd /usr/src && git clone https://github.com/kaltura/nginx-vod-module.git
 cd /usr/src/nginx-vod-module && git checkout -b latest-tag $(git describe --tags)
 
 # build nginx
+cd /usr/src && git clone https://github.com/nginx/njs.git
 cd /usr/src/nginx
 
 ./configure \
@@ -25,6 +26,7 @@ cd /usr/src/nginx
   --with-http_sub_module \
   --with-cc-opt="-O3" \
   --add-module=/usr/src/nginx-vod-module \
+  --add-module=/usr/src/njs/nginx \
   --with-debug \
   --error-log-path=/dev/stderr \
   --http-log-path=/dev/stdout

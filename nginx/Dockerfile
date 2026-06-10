@@ -1,12 +1,8 @@
-# UMD Customization
-# Multi-stage build: builder stage on phusion/baseimage:noble-1.0.2 (Ubuntu 24.04 Noble)
-# to replace the previous single-stage build on phusion/baseimage:0.11 (Ubuntu 16.04 Xenial).
 FROM        phusion/baseimage:noble-1.0.2 AS builder
-
 RUN         sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources
-RUN         DEBIAN_FRONTEND=noninteractive \
-         && apt-get update \
-         && apt-get install -y \
+RUN         DEBIAN_FRONTEND=noninteractive; \
+            apt-get update \
+         && apt-get install -y \ 
             mediainfo \
             ffmpeg \
             x264 \
@@ -18,15 +14,14 @@ RUN         DEBIAN_FRONTEND=noninteractive \
             dnsmasq \
             # gettext-base provides 'envsubst', used by nginx.sh
             gettext-base \
-            libxslt-dev \
-         && apt-get clean
+            libxslt-dev
 
 ADD         build-nginx.sh /usr/src/build-nginx.sh
 RUN         /usr/src/build-nginx.sh
 
+
 FROM        phusion/baseimage:noble-1.0.2
-# End UMD Customization
-LABEL       maintainer="Michael B. Klein <michael.klein@northwestern.edu>"
+LABEL       maintainer="Michael B. Klein <michael.klein@northwestern.edu>, Phuong Dinh <pdinh@indiana.edu>"
 
 COPY        --from=builder /usr/local/nginx /usr/local/nginx
 COPY        --from=builder /etc/nginx /etc/nginx
@@ -43,21 +38,24 @@ EXPOSE      80
 
 RUN         useradd nginx
 RUN         mkdir /data && chmod 0777 /data \
-         && mkdir -p /var/log/nginx \
-         && chown nginx /var/log/nginx \
+         && mkdir -p /var/log/nginx && chown nginx /var/log/nginx \
          && mkdir /etc/service/dnsmasq \
          && mkdir /etc/service/nginx
 
 ADD         stat.xsl  /etc/nginx/stat.xsl
 
+# UMD Customization
 # Set default proxy cache valid duration
 ENV         PROXY_CACHE_VALID_DURATION=3m
 # Set default S3 presigned URL cache duration (in seconds)
 ENV         S3_PRESIGNED_URL_CACHE_DURATION=240
+# End UMD Customization
 
 ADD         nginx.conf.template /etc/nginx/nginx.conf.template
+ADD         signature4.js /etc/nginx/include/signature4.js
 ADD         dnsmasq.sh /etc/service/dnsmasq/run
 ADD         nginx.sh /etc/service/nginx/run
+
 RUN         chmod +x /etc/service/nginx/run
 
 VOLUME      /data
