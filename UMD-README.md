@@ -13,14 +13,11 @@ use images built from this repository.
 
 The UMD Avalon stack consists of
 
-* Customized Avalon Docker images
-* Stock Avalon Docker images that have been tagged with a specific version.
-  This is needed because some Avalon Docker images use images without tags, or
-  with non-stable tags (such as "postgres:14-alpine), and SSDR policy is to only
-  use Docker images with specific tags in the server environment.
+* Customized Docker images built from this repository (HLS nginx)
+* Stock Docker images used directly without retagging (db, Fedora, Solr, Redis)
 * Docker images not provided by Avalon
 
-All Docker images should be built using "docker buildx" and the Kubernetes
+Custom images should be built using "docker buildx" and the Kubernetes
 "build" namespace. See
 <https://github.com/umd-lib/devops/blob/main/k8s/docs/guides/DockerBuilds.md>
 in Confluence for more information.
@@ -80,7 +77,7 @@ base version, having the form:
 
 where
 
-* \<AVALON_VERSION> - the Avalon version, i.e., `7.8.0`
+* \<AVALON_VERSION> - the Avalon version, i.e., `8.2`
 
   A three-part version number ("\<MAJOR>.\<MINOR>.\<PATCH>") is used,
   even if the corresponding Avalon tag has only two parts (i.e., a "7.8" version
@@ -90,8 +87,8 @@ where
 
 * \<INTEGER> - an UMD incrementing version, i.e., `0`, `1`, etc.
 
-Therefore the first Git tag based on an Avalon 7.8 release would be
-`7.8.0-umd-0`, followed (if needed) by `7.8.0-umd-1`.
+Therefore the first Git tag based on an Avalon 8.2 release would be
+`8.2-umd-0`, followed (if needed) by `8.2-umd-1`.
 
 Note that the Git tags in the "umd-lib/avalon" repository follow the same
 pattern, but that the Git tag (and subsequent Docker image tags) used by this
@@ -111,11 +108,11 @@ which is then used as the version tag for the Docker images.
    export GIT_TAG=<GIT_TAG>
    ```
 
-   For example, when building the Docker images for the first Avalon 7.8
-   release, where the Git tag is "7.8.0-umd-0":
+   For example, when building the Docker images for the first Avalon 8.2
+   release, where the Git tag is "8.2-umd-0":
 
    ```zsh
-   export GIT_TAG=7.8.0-umd-0
+   export GIT_TAG=8.2-umd-0
    ```
 
 2. Checkout the tag:
@@ -124,56 +121,7 @@ which is then used as the version tag for the Docker images.
    git checkout $GIT_TAG
    ```
 
-3. Create environment variables for each of the stock Docker images being
-   renamed and redeployed to the Nexus.
-
-   The following commands use the "[yq](https://github.com/mikefarah/yq)"
-   utility to parse the Docker image names from the "docker-compose.yml" file:
-
-    ```zsh
-    export DB_IMAGE=`yq '.services.db.image' docker-compose.yml`
-    export FEDORA_IMAGE=`yq '.services.fedora.image' docker-compose.yml`
-    export SOLR_IMAGE=`yq '.services.solr.image' docker-compose.yml`
-    export REDIS_IMAGE=`yq '.services.redis.image' docker-compose.yml`
-    ```
-
-4. Pull the Docker images, specifying the "linux/amd64" architecture used by
-   Kubernetes. (Cannot use "docker-compose pull", because on an Apple Silicon
-   Mac, the "arm64" Docker images will be retrieved).
-
-   ```zsh
-   docker pull --platform=linux/amd64 $DB_IMAGE
-   docker pull --platform=linux/amd64 $FEDORA_IMAGE
-   docker pull --platform=linux/amd64 $SOLR_IMAGE
-   docker pull --platform=linux/amd64 $REDIS_IMAGE
-   ```
-
-5. Tag the images with a UMD-specific version number:
-
-    ```zsh
-    docker tag $DB_IMAGE docker.lib.umd.edu/db:fedora4-avalon-$GIT_TAG
-    docker tag $FEDORA_IMAGE docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
-    docker tag $SOLR_IMAGE docker.lib.umd.edu/solr:avalon-$GIT_TAG
-    docker tag $REDIS_IMAGE docker.lib.umd.edu/redis:avalon-$GIT_TAG
-    ```
-
-    ----
-
-    **Note:** Prior to Avalon 7.8, these stock Docker images were typically
-    tagged only with the Avalon version number (i.e., "7.5.1").
-
-    ----
-
-6. Push the images to the UMD Nexus:
-
-    ```zsh
-    docker push docker.lib.umd.edu/db:fedora4-avalon-$GIT_TAG
-    docker push docker.lib.umd.edu/fedora:4.7.5-avalon-$GIT_TAG
-    docker push docker.lib.umd.edu/solr:avalon-$GIT_TAG
-    docker push docker.lib.umd.edu/redis:avalon-$GIT_TAG
-    ```
-
-7. Build the HLS Nginx image:
+3. Build the HLS Nginx image:
 
     ```zsh
     cd nginx
@@ -184,12 +132,13 @@ which is then used as the version tag for the Docker images.
 
     The Docker image will be automatically pushed to the Nexus.
 
-8. Build the SFTP (with rsync) image:
+4. Build the Fedora (fcrepo) image:
 
     ```zsh
-    cd sftp
+    cd fedora
     docker buildx build --no-cache . --builder kube --platform linux/amd64 \
-      --push -t docker.lib.umd.edu/avalon-sftp:$GIT_TAG
+      -f Dockerfile.fcrepo7-irsa-fix \
+      --push -t docker.lib.umd.edu/fcrepo:7-avalon-$GIT_TAG
     cd ..
     ```
 
@@ -201,16 +150,17 @@ which is then used as the version tag for the Docker images.
 
 UMD-specific README.md describing use, procedures, and customizations.
 
-### SFTP Docker configuration
-
-The SFTP Docker configuration (in the "sftp" subdirectory) is a UMD addition to
-this repository, used to support SFTP uploads to Avalon.
-
 ### Nginx
 
-The nginx configuration are based on the
-<https://github.com/avalonmediasystem/avalon-docker/tree/avalon-7.8.0-aws_min>
-branch.
+The nginx configuration is based on the upstream
+<https://github.com/avalonmediasystem/avalon-docker> `avalon-8.2` tag, with
+UMD-specific additions (see below).
+
+### nginx/Dockerfile
+
+Updated to a multi-stage build using `phusion/baseimage:noble-1.0.2` (Ubuntu
+24.04 Noble) as both builder and runtime base, replacing the previous
+single-stage build on `phusion/baseimage:0.11` (Ubuntu 16.04 Xenial).
 
 ### nginx/nginx.conf.template
 
@@ -234,4 +184,28 @@ as it also uses this Docker image.
 
 ### nginx/build-nginx.sh
 
-Added the "--with-http_ssl_module" for use with Kubernetes.
+Updated to use `apt-get source nginx` (Ubuntu Noble system package) instead of
+downloading a pinned tarball from nginx.org. Added the `--with-http_ssl_module`
+and `--with-threads` flags for Kubernetes compatibility and VOD module async I/O.
+
+### fedora/Dockerfile.fcrepo7-irsa-fix
+
+Builds a custom `docker.lib.umd.edu/fcrepo` image on top of the stock
+`fcrepo/fcrepo:7-tomcat10` image. It adds the AWS STS JAR that is missing from
+the upstream Fedora distribution, which is required for
+[IRSA (IAM Roles for Service Accounts)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+/ web-identity token authentication against S3.
+
+The fix detects the AWS SDK version already bundled in the Fedora webapp and
+downloads the matching `sts` JAR from Maven Central — no manual version pinning
+is required.
+
+Upstream issues have been filed to add the AWS STS dependency directly to
+Fedora and its dependencies, which would make this custom image unnecessary:
+
+* <https://github.com/fcrepo/fcrepo/issues/2311> — fcrepo/fcrepo
+* <https://github.com/OCFL/ocfl-java/issues/140> — OCFL/ocfl-java
+
+Once either of those issues is resolved and the fix is included in a released
+version of the upstream `fcrepo/fcrepo` image, this custom image can be
+dropped in favor of the stock image.

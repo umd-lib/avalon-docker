@@ -1,24 +1,19 @@
 #!/bin/sh
 # UMD Customization
-# Build newer version of NGINX with nginx-vod-module
+# Build NGINX with nginx-vod-module using the system nginx source package.
+# Using apt-get source (Ubuntu Noble) instead of a pinned nginx.org tarball
+# for better compatibility with the Noble toolchain.
 set -e
 
-NGINX_VERSION=1.24.0
-
-cd /usr/src
-
-# nginx source
-curl -fsSLO https://nginx.org/download/nginx-${NGINX_VERSION}.tar.gz
-tar xzf nginx-${NGINX_VERSION}.tar.gz
-mv nginx-${NGINX_VERSION} nginx
+# Get nginx source from Ubuntu Noble apt sources (requires deb-src in sources.list)
+cd /usr/src && apt-get source nginx && mv nginx-* nginx
 
 # nginx-vod-module (latest stable tag)
-git clone https://github.com/kaltura/nginx-vod-module.git
-cd nginx-vod-module
-git fetch --tags
-git checkout $(git describe --tags --abbrev=0)
+cd /usr/src && git clone https://github.com/kaltura/nginx-vod-module.git
+cd /usr/src/nginx-vod-module && git checkout -b latest-tag $(git describe --tags)
 
 # build nginx
+cd /usr/src && git clone https://github.com/nginx/njs.git
 cd /usr/src/nginx
 
 ./configure \
@@ -31,6 +26,7 @@ cd /usr/src/nginx
   --with-http_sub_module \
   --with-cc-opt="-O3" \
   --add-module=/usr/src/nginx-vod-module \
+  --add-module=/usr/src/njs/nginx \
   --with-debug \
   --error-log-path=/dev/stderr \
   --http-log-path=/dev/stdout
@@ -39,8 +35,5 @@ make -j$(nproc)
 make install
 
 # cleanup
-cd /
-rm -rf /usr/src/nginx \
-       /usr/src/nginx-vod-module \
-       /usr/src/nginx-${NGINX_VERSION}.tar.gz
+cd / && rm -rf /usr/src/*
 # End UMD Customization

@@ -2,6 +2,12 @@ user nginx;
 worker_processes 4;
 daemon off;
 
+env AWS_ACCESS_KEY_ID;
+env AWS_SECRET_ACCESS_KEY;
+env S3_BUCKET_NAME;
+env S3_REGION;
+env S3_SERVER;
+
 events {
   worker_connections 1024;
 }
@@ -17,9 +23,17 @@ http {
       use_temp_path=off;
   # End UMD Customization
 
+  js_import /etc/nginx/include/signature4.js;
+  js_set $s3auth        signature4.signature;
+  js_set $awsDate       signature4.getAmzDatetime;
+
   server {
     listen $AVALON_STREAMING_PORT;
 
+    # UMD Customization
+    # vod_mode $VOD_MODE;
+    # vod_upstream_location /s3;
+    # End UMD Customization
     vod_last_modified 'Sun, 19 Nov 2000 08:52:00 GMT';
     vod_last_modified_types *;
     vod_metadata_cache metadata_cache 1024m;
@@ -31,8 +45,6 @@ http {
     vod_hls_absolute_index_urls off;
     vod_hls_absolute_master_urls off;
 
-    gzip on;
-    gzip_types application/vnd.apple.mpegurl;
     # UMD Customization
     vod_segments_base_url $AVALON_STREAMING_BASE_URL;
     vod_base_url $AVALON_STREAMING_BASE_URL;
@@ -43,11 +55,34 @@ http {
     open_file_cache_errors   on;
     
     location /status {
-      access_log off;
       vod_status;
     }
+
+    location /s3/avalon/ {
+      internal;
+
+      # proxy_set_header skips setting header if value is empty so only set if s3 auth is enabled
+      set $auth_authz '';
+      set $auth_date '';
+      set $auth_sha '';
+
+      set $do_s3_auth $S3_AUTH;
+      if ($do_s3_auth) {
+        set $auth_authz $s3auth;
+        set $auth_date $awsDate;
+        # Hardcode hash for empty string since we're only ever doing GET requests
+        set $auth_sha "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+      }
+
+      proxy_set_header Authorization              $auth_authz;
+      proxy_set_header Host                       $S3_SERVER;
+      proxy_set_header x-amz-date                 $auth_date;
+      proxy_set_header x-amz-content-sha256       $auth_sha;
+
+      proxy_pass $AVALON_STREAMING_BUCKET_URL;
+    }
     
-    location ~ ^/avalon/(?<stream>.+)/(?<resource>.+\.(?:m3u8|ts)) {
+    location ~ ^/avalon/(?<stream>.+)\/[^\/]+\.(?:m3u8|ts) {
 
       # UMD Customization
       vod_mode local;
@@ -55,6 +90,9 @@ http {
 
       alias /data/$stream;
       vod hls;
+
+      gzip on;
+      gzip_types application/x-mpegURL;
 
       set $token "$arg_token";
       add_header X-Stream-Auth-Token "$token";
@@ -100,6 +138,29 @@ http {
       proxy_set_header Cookie "";
       proxy_ssl_server_name on;
       proxy_pass $remote_url;
+    }
+
+    location ~ ^/avalon/(?<stream>.+/.+\.(?:mp3)) {
+      alias /data/$stream;
+      vod none;
+
+      set $token "$arg_token";
+      add_header X-Stream-Auth-Token "$token";
+
+      gzip on;
+      gzip_types audio/mp3;
+
+      sub_filter_types audio/mp3;
+      sub_filter_once off;
+      sub_filter '.mp3' ".mp3?token=$token";
+
+      auth_request /auth;
+
+      add_header Access-Control-Allow-Headers '*';
+      add_header Access-Control-Expose-Headers 'Server,range,Content-Length,Content-Range';
+      add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+      add_header Access-Control-Allow-Origin "*";
+      expires 100d;
     }
 
     location = /auth {

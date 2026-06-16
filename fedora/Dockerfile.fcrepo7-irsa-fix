@@ -1,0 +1,15 @@
+FROM fcrepo/fcrepo:7-tomcat10
+
+# Add the missing AWS SDK modules needed for IRSA/web-identity support.
+# Detects the SDK version already bundled in the webapp and fetches the three
+# missing JARs from Maven Central at the same version — no manual ARG needed.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/* \
+ && AWS_SDK_VERSION=$(ls /usr/local/tomcat/webapps/fcrepo/WEB-INF/lib/aws-core-*.jar \
+      | sed 's/.*aws-core-\(.*\)\.jar/\1/') \
+ && echo "Detected AWS SDK version: ${AWS_SDK_VERSION}" \
+ && BASE_URL="https://repo1.maven.org/maven2/software/amazon/awssdk" \
+ && LIB_DIR="/usr/local/tomcat/webapps/fcrepo/WEB-INF/lib" \
+ && curl -fsSL -o "${LIB_DIR}/sts-${AWS_SDK_VERSION}.jar" \
+      "${BASE_URL}/sts/${AWS_SDK_VERSION}/sts-${AWS_SDK_VERSION}.jar"
