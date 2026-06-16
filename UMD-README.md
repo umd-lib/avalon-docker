@@ -138,7 +138,7 @@ which is then used as the version tag for the Docker images.
     cd fedora
     docker buildx build --no-cache . --builder kube --platform linux/amd64 \
       -f Dockerfile.fcrepo7-irsa-fix \
-      --push -t docker.lib.umd.edu/fcrepo:avalon-$GIT_TAG
+      --push -t docker.lib.umd.edu/fcrepo:7-avalon-$GIT_TAG
     cd ..
     ```
 
