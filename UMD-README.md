@@ -87,8 +87,8 @@ where
 
 * \<INTEGER> - an UMD incrementing version, i.e., `0`, `1`, etc.
 
-Therefore the first Git tag based on an Avalon 8.2 release would be
-`8.2-umd-0`, followed (if needed) by `8.2-umd-1`.
+Therefore the first Git tag based on an Avalon 8.2.0 release would be
+`8.2.0-umd-0`, followed (if needed) by `8.2.0-umd-1`.
 
 Note that the Git tags in the "umd-lib/avalon" repository follow the same
 pattern, but that the Git tag (and subsequent Docker image tags) used by this
@@ -108,11 +108,11 @@ which is then used as the version tag for the Docker images.
    export GIT_TAG=<GIT_TAG>
    ```
 
-   For example, when building the Docker images for the first Avalon 8.2
-   release, where the Git tag is "8.2-umd-0":
+   For example, when building the Docker images for the first Avalon 8.2.0
+   release, where the Git tag is "8.2.0-umd-0":
 
    ```zsh
-   export GIT_TAG=8.2-umd-0
+   export GIT_TAG=8.2.0-umd-0
    ```
 
 2. Checkout the tag:
