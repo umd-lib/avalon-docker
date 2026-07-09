@@ -11,7 +11,7 @@ env S3_SERVER;
 events {
   worker_connections 1024;
 }
-
+ 
 http {
   # UMD Customization
   # Auth cache to reduce load on auth service
@@ -30,15 +30,13 @@ http {
   server {
     listen $AVALON_STREAMING_PORT;
 
-    # UMD Customization
-    # vod_mode $VOD_MODE;
-    # vod_upstream_location /s3;
-    # End UMD Customization
+    vod_mode $VOD_MODE;
+    vod_upstream_location /s3;
     vod_last_modified 'Sun, 19 Nov 2000 08:52:00 GMT';
     vod_last_modified_types *;
+    # UMD Customization
     vod_metadata_cache metadata_cache 1024m;
     vod_response_cache response_cache 128m;
-    # UMD Customization
     # Set S3 Presigned URL cache duration
     vod_mapping_cache mapping_cache 64m $S3_PRESIGNED_URL_CACHE_DURATION;
     # End UMD Customization
@@ -83,11 +81,6 @@ http {
     }
     
     location ~ ^/avalon/(?<stream>.+)\/[^\/]+\.(?:m3u8|ts) {
-
-      # UMD Customization
-      vod_mode local;
-      # End UMD Customization
-
       alias /data/$stream;
       vod hls;
 
@@ -124,6 +117,11 @@ http {
 
       auth_request /auth;
 
+      add_header Access-Control-Allow-Headers '*';
+      add_header Access-Control-Expose-Headers 'Server,range,Content-Length,Content-Range';
+      add_header Access-Control-Allow-Methods 'GET, HEAD, OPTIONS';
+      add_header Access-Control-Allow-Origin '*';
+
       auth_request_set $remote_url $upstream_http_x_s3_presigned_url;
 
       # Use the signed URL from Avalon
@@ -132,7 +130,7 @@ http {
 
     # Internal location to actually proxy to S3
     location /fetch_from_s3 {
-      resolver kube-dns.kube-system.svc.cluster.local valid=5s;
+      resolver $DNS_RESOLVER_CONFIG;
       internal;
       proxy_pass_request_body off;
       proxy_set_header Cookie "";

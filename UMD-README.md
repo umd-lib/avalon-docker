@@ -125,8 +125,8 @@ which is then used as the version tag for the Docker images.
 
     ```zsh
     cd nginx
-    docker buildx build --no-cache . --builder kube --platform linux/amd64 \
-      --push -t docker.lib.umd.edu/nginx:avalon-$GIT_TAG
+    docker buildx build --no-cache . --builder kube --platform \
+    linux/amd64,linux/arm64 --push -t docker.lib.umd.edu/nginx:avalon-$GIT_TAG
     cd ..
     ```
 
