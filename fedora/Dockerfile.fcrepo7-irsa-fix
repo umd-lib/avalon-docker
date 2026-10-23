@@ -1,11 +1,27 @@
 FROM fcrepo/fcrepo:7-tomcat10
 
+# Address the eMudhra intermediate CA key compromise (Oct 2026,
+# https://emudhra.we-have-a-problem.com/).
+# 1. Upgrade the OS CA bundle to the patched Ubuntu 24.04 package, which
+#    distrusts "emSign ECC Root CA - G3".
+# 2. Remove the same root from the JDK's own truststore. Temurin ships a
+#    separate cacerts file that the OS package does not touch, and Fedora's
+#    outbound TLS (e.g. S3) goes through Java.
+# Both steps can be dropped once the base image ships ca-certificates
+# >= 20260816ubuntu0.24.04.1 and a Temurin JDK >= 21.0.13.
+
+ARG EMSIGN_ECC_G3_ALIAS="cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]"
+
 # Add the missing AWS SDK modules needed for IRSA/web-identity support.
 # Detects the SDK version already bundled in the webapp and fetches the three
 # missing JARs from Maven Central at the same version — no manual ARG needed.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends curl \
+ && apt-get install -y --no-install-recommends curl ca-certificates \
  && rm -rf /var/lib/apt/lists/* \
+ && if keytool -list -cacerts -storepass changeit -alias "${EMSIGN_ECC_G3_ALIAS}" >/dev/null 2>&1; then \
+      keytool -delete -cacerts -storepass changeit -alias "${EMSIGN_ECC_G3_ALIAS}"; \
+    fi \
+ && ! keytool -list -cacerts -storepass changeit | grep -qi 'emsign_ecc_root_ca__g3' \
  && AWS_SDK_VERSION=$(ls /usr/local/tomcat/webapps/fcrepo/WEB-INF/lib/aws-core-*.jar \
       | sed 's/.*aws-core-\(.*\)\.jar/\1/') \
  && echo "Detected AWS SDK version: ${AWS_SDK_VERSION}" \
