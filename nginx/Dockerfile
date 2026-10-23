@@ -11,6 +11,7 @@ RUN         DEBIAN_FRONTEND=noninteractive; \
             libpcre3-dev \
             zlib1g-dev \
             libssl-dev \
+            ca-certificates \
             dnsmasq \
             # gettext-base provides 'envsubst', used by nginx.sh
             gettext-base \
@@ -28,6 +29,7 @@ COPY        --from=builder /etc/nginx /etc/nginx
 
 RUN         apt-get update \
          && apt-get install -y \
+            ca-certificates \
             dnsmasq \
             gettext-base \
             libpcre3 \
